@@ -35,6 +35,8 @@ export class IslandStampPass {
         uIslandCount: { value: 0 },
         uIslandPos: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector2()) },
         uIslandRadius: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandElongation: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandRotation: { value: new Float32Array(MAX_ISLANDS) },
         uIslandColor: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector3()) },
         uIslandEmerge: { value: new Float32Array(MAX_ISLANDS) },
         uIslandErode: { value: new Float32Array(MAX_ISLANDS) },
@@ -64,6 +66,8 @@ export class IslandStampPass {
         const isl = islands[i];
         (u.uIslandPos.value as THREE.Vector2[])[i].set(isl.position[0], isl.position[1]);
         (u.uIslandRadius.value as Float32Array)[i] = isl.radius;
+        (u.uIslandElongation.value as Float32Array)[i] = isl.elongation;
+        (u.uIslandRotation.value as Float32Array)[i] = isl.rotation;
         (u.uIslandColor.value as THREE.Vector3[])[i].set(isl.color[0], isl.color[1], isl.color[2]);
         (u.uIslandEmerge.value as Float32Array)[i] = isl.emergeProgress;
         (u.uIslandErode.value as Float32Array)[i] = isl.erodeProgress;

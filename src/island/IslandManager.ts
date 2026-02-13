@@ -66,6 +66,8 @@ export class IslandManager {
       id: this.nextId++,
       position: [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.5],
       radius: randRange(CONFIG.island.radiusRange),
+      elongation: 1.2 + Math.random() * 0.6,  // 1.2 to 1.8
+      rotation: Math.random() * Math.PI,        // 0 to π
       color,
       phase: 'emerging',
       emergeProgress: 0,
