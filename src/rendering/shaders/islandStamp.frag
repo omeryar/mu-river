@@ -26,13 +26,10 @@ void main() {
     vec2 delta = (vUv - uIslandPos[i]) * aspect;
     float rawDist = length(delta) / uIslandRadius[i];
 
-    // Irregular pebble shape: use angle-dependent noise to break the circle
-    // Convert to polar angle for angular variation
+    // Gentle irregular pebble shape: angle-dependent noise to break the circle
     float angle = atan(delta.y, delta.x);
-    // Multiple noise octaves at different angular frequencies for natural stone shape
-    float angularWarp = snoise(vec2(angle * 1.5, float(i) * 7.1)) * 0.15
-                      + snoise(vec2(angle * 3.0, float(i) * 13.7)) * 0.08
-                      + snoise(vec2(angle * 5.0, float(i) * 23.3)) * 0.04;
+    float angularWarp = snoise(vec2(angle * 2.0, float(i) * 7.1)) * 0.05
+                      + snoise(vec2(angle * 4.0, float(i) * 13.7)) * 0.025;
     float dist = rawDist + angularWarp;
 
     // Solid pebble shape: fully opaque inside, soft at very edge
