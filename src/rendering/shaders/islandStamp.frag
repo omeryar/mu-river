@@ -47,25 +47,43 @@ void main() {
     // Overall opacity ramps up during emergence for a "rising from water" feel
     float emergeOpacity = smoothstep(0.0, 0.4, uIslandEmerge[i]);
 
-    // Erosion: flow-directed, not uniform shrink
-    // Flow is upward (+Y), so upstream face (delta.y > 0) erodes first
-    float upstreamBias = delta.y / (length(delta) + 0.001); // -1 to +1
+    // === Erosion via domain-warped noise field ===
+    // Instead of thresholding on radial distance (which always shrinks as an ellipse),
+    // we build a 2D erosion field where each point has a "resistance" value 0–1.
+    // Low resistance = erodes first. As erodeProgress rises, more points are consumed.
+    //
+    // The field blends:
+    //   - (1-dist): edges have low resistance, center high (so center erodes last)
+    //   - Domain-warped fbm: creates organic channels that eat inward
+    //   - Upstream flow bias: upstream face has lower resistance
 
-    // Upstream side erodes earlier (lower threshold = erodes sooner)
-    float directional = upstreamBias * 0.35 * uIslandErode[i];
-
-    // Multi-scale noise for organic breakup (scaled by erode progress)
     float erodeProgress = uIslandErode[i];
-    float n1 = snoise(rotated * 8.0 + float(i) * 7.3 + uTime * 0.08) * 0.25;
-    float n2 = snoise(rotated * 16.0 + float(i) * 3.1 + uTime * 0.15) * 0.12;
-    float erodeNoise = (n1 + n2) * erodeProgress;
 
-    // Erosion threshold: starts at 1.0 (nothing eroded), decreases over time
-    // directional bias makes upstream reach threshold sooner
-    float erodeFront = 1.0 - erodeProgress + erodeNoise - directional;
+    // Domain-warped noise (Inigo Quilez technique) for organic channel patterns
+    // First noise layer warps the input of the second, creating flowing tendrils
+    vec2 noiseCoord = rotated * 5.0 + float(i) * 7.3;
+    vec2 q = vec2(
+      fbm(noiseCoord + vec2(0.0, 0.0) + uTime * 0.03, 3),
+      fbm(noiseCoord + vec2(5.2, 1.3) + uTime * 0.03, 3)
+    );
+    // Warp the noise input by q — this creates the branching, tendril-like patterns
+    float erosionNoise = fbm(noiseCoord + q * 2.5 + uTime * 0.02, 3);
+    // Map from [-1,1] to [0,1]
+    erosionNoise = erosionNoise * 0.5 + 0.5;
 
-    // Wider transition band for softer, smokier erosion edges
-    float eroded = smoothstep(erodeFront + 0.06, erodeFront - 0.06, dist);
+    // Erosion resistance field:
+    //   Radial component (0.45): ensures center is last to go
+    //   Noise component (0.55): creates organic channels eating inward
+    float radialResistance = 1.0 - dist; // 0 at edge, 1 at center
+    float erosionField = radialResistance * 0.45 + erosionNoise * 0.55;
+
+    // Flow bias: upstream face (delta.y > 0) has reduced resistance
+    float upstreamBias = delta.y / (length(delta) + 0.001);
+    erosionField -= upstreamBias * 0.18;
+
+    // Body exists where erosionField > erodeProgress
+    // As erodeProgress goes 0→1, more of the field falls below threshold
+    float eroded = smoothstep(erodeProgress - 0.04, erodeProgress + 0.04, erosionField);
 
     float density = shape * emerged * eroded * emergeOpacity * uPigmentIntensity;
 
