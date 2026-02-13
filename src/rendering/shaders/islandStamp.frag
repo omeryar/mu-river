@@ -47,12 +47,25 @@ void main() {
     // Overall opacity ramps up during emergence for a "rising from water" feel
     float emergeOpacity = smoothstep(0.0, 0.4, uIslandEmerge[i]);
 
-    // Erosion: front moves from outside in, with noise breakup
-    // Scale noise by erode progress so it's zero before erosion starts
-    float erodeNoise = snoise(rotated * 10.0 + float(i) * 7.3 + uTime * 0.1) * uErosionNoise * uIslandErode[i];
-    float erodeFront = 1.0 - uIslandErode[i] + erodeNoise;
-    // Reversed args: returns 1 inside body (dist < erodeFront), 0 outside (eroded away)
-    float eroded = smoothstep(erodeFront + 0.03, erodeFront - 0.03, dist);
+    // Erosion: flow-directed, not uniform shrink
+    // Flow is upward (+Y), so upstream face (delta.y > 0) erodes first
+    float upstreamBias = delta.y / (length(delta) + 0.001); // -1 to +1
+
+    // Upstream side erodes earlier (lower threshold = erodes sooner)
+    float directional = upstreamBias * 0.35 * uIslandErode[i];
+
+    // Multi-scale noise for organic breakup (scaled by erode progress)
+    float erodeProgress = uIslandErode[i];
+    float n1 = snoise(rotated * 8.0 + float(i) * 7.3 + uTime * 0.08) * 0.25;
+    float n2 = snoise(rotated * 16.0 + float(i) * 3.1 + uTime * 0.15) * 0.12;
+    float erodeNoise = (n1 + n2) * erodeProgress;
+
+    // Erosion threshold: starts at 1.0 (nothing eroded), decreases over time
+    // directional bias makes upstream reach threshold sooner
+    float erodeFront = 1.0 - erodeProgress + erodeNoise - directional;
+
+    // Wider transition band for softer, smokier erosion edges
+    float eroded = smoothstep(erodeFront + 0.06, erodeFront - 0.06, dist);
 
     float density = shape * emerged * eroded * emergeOpacity * uPigmentIntensity;
 
