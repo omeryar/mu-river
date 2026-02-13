@@ -46,16 +46,25 @@ void main() {
     rotated.x *= uIslandElongation[i];
     float dist = length(rotated) / uIslandRadius[i];
 
-    float shape = 1.0 - smoothstep(0.75, 0.95, dist);
+    // Noise-perturbed distance for irregular boundary (like a weathered stone)
+    float boundaryNoise = snoise(rotated * 8.0 + float(i) * 13.7) * 0.1
+                        + snoise(rotated * 16.0 + float(i) * 5.9) * 0.05;
+    float noisyDist = dist + boundaryNoise;
+
+    float shape = 1.0 - smoothstep(0.7, 0.92, noisyDist);
+
+    // Subtle interior density variation (not flat/uniform)
+    float interiorNoise = snoise(rotated * 12.0 + float(i) * 19.3) * 0.08;
+    shape *= (0.95 + interiorNoise);
 
     // Emergence: center appears first, grows outward
     float emergeThresh = 1.0 - uIslandEmerge[i];
-    float emerged = smoothstep(emergeThresh + 0.15, emergeThresh - 0.05, dist);
+    float emerged = smoothstep(emergeThresh + 0.15, emergeThresh - 0.05, noisyDist);
     float emergeOpacity = smoothstep(0.0, 0.4, uIslandEmerge[i]);
 
     float density = shape * emerged * emergeOpacity;
 
-    // Max-blend: only add material, never overwrite stronger material
+    // Max-blend: keep interior solid, only add new material
     if (density > body.a) {
       body = vec4(uIslandColor[i], density);
     }
