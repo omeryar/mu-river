@@ -1,0 +1,88 @@
+import * as THREE from 'three';
+import { CONFIG } from '../config';
+import { FlowField } from '../simulation/FlowField';
+import { IslandManager } from '../island/IslandManager';
+import { IslandStampPass } from '../rendering/IslandStampPass';
+import { PigmentPass } from '../rendering/PigmentPass';
+import { CompositePass } from '../rendering/CompositePass';
+
+export class Renderer {
+  private threeRenderer: THREE.WebGLRenderer;
+  private flowField: FlowField;
+  private islandManager: IslandManager;
+  private islandStampPass: IslandStampPass;
+  private pigmentPass: PigmentPass;
+  private compositePass: CompositePass;
+  private clock: THREE.Clock;
+
+  constructor() {
+    this.threeRenderer = new THREE.WebGLRenderer({ antialias: false });
+    this.threeRenderer.setPixelRatio(window.devicePixelRatio);
+    this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.threeRenderer.domElement);
+
+    const w = Math.floor(window.innerWidth * CONFIG.simScale);
+    const h = Math.floor(window.innerHeight * CONFIG.simScale);
+
+    this.flowField = new FlowField(w, h);
+    this.islandManager = new IslandManager();
+    this.islandStampPass = new IslandStampPass(w, h);
+    this.pigmentPass = new PigmentPass(w, h);
+    this.compositePass = new CompositePass();
+
+    this.clock = new THREE.Clock();
+
+    window.addEventListener('resize', this.onResize);
+  }
+
+  private onResize = (): void => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.threeRenderer.setSize(width, height);
+
+    const w = Math.floor(width * CONFIG.simScale);
+    const h = Math.floor(height * CONFIG.simScale);
+    this.flowField.resize(w, h);
+    this.islandStampPass.resize(w, h);
+    this.pigmentPass.resize(w, h);
+  };
+
+  start(): void {
+    const animate = (): void => {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min(this.clock.getDelta(), 0.05); // clamp to avoid spiral
+      const time = this.clock.elapsedTime;
+
+      // 1. Update island lifecycle (CPU)
+      this.islandManager.update(dt);
+
+      // 2. Generate flow field
+      this.flowField.update(time, this.threeRenderer);
+
+      // 3. Stamp islands
+      this.islandStampPass.update(
+        this.islandManager.getIslands(),
+        time,
+        this.threeRenderer,
+      );
+
+      // 4. Advect pigment
+      this.pigmentPass.update(
+        this.flowField.getTexture(),
+        this.islandStampPass.getTexture(),
+        dt,
+        this.threeRenderer,
+      );
+
+      // 5. Composite to screen (pigment trails + solid island bodies)
+      this.compositePass.render(
+        this.pigmentPass.getTexture(),
+        this.islandStampPass.getTexture(),
+        this.threeRenderer,
+      );
+    };
+
+    animate();
+  }
+}
