@@ -26,7 +26,7 @@ export const CONFIG = {
     erodeDuration: [20, 60] as [number, number],   // seconds to fully erode
     radiusRange: [0.06, 0.14] as [number, number], // normalized to screen height
     pigmentIntensity: 0.8,
-    erosionNoise: 0.4,      // noise breakup on erosion front
+    erodeRate: 0.018,        // per-frame erosion rate for exposed edge pixels
   },
 
   // Composite

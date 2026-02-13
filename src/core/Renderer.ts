@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CONFIG } from '../config';
 import { FlowField } from '../simulation/FlowField';
 import { IslandManager } from '../island/IslandManager';
-import { IslandStampPass } from '../rendering/IslandStampPass';
+import { IslandBodyPass } from '../rendering/IslandBodyPass';
 import { PigmentPass } from '../rendering/PigmentPass';
 import { CompositePass } from '../rendering/CompositePass';
 
@@ -10,7 +10,7 @@ export class Renderer {
   private threeRenderer: THREE.WebGLRenderer;
   private flowField: FlowField;
   private islandManager: IslandManager;
-  private islandStampPass: IslandStampPass;
+  private islandBodyPass: IslandBodyPass;
   private pigmentPass: PigmentPass;
   private compositePass: CompositePass;
   private clock: THREE.Clock;
@@ -26,7 +26,7 @@ export class Renderer {
 
     this.flowField = new FlowField(w, h);
     this.islandManager = new IslandManager();
-    this.islandStampPass = new IslandStampPass(w, h);
+    this.islandBodyPass = new IslandBodyPass(w, h);
     this.pigmentPass = new PigmentPass(w, h);
     this.compositePass = new CompositePass();
 
@@ -43,7 +43,7 @@ export class Renderer {
     const w = Math.floor(width * CONFIG.simScale);
     const h = Math.floor(height * CONFIG.simScale);
     this.flowField.resize(w, h);
-    this.islandStampPass.resize(w, h);
+    this.islandBodyPass.resize(w, h);
     this.pigmentPass.resize(w, h);
   };
 
@@ -51,7 +51,7 @@ export class Renderer {
     const animate = (): void => {
       requestAnimationFrame(animate);
 
-      const dt = Math.min(this.clock.getDelta(), 0.05); // clamp to avoid spiral
+      const dt = Math.min(this.clock.getDelta(), 0.05);
       const time = this.clock.elapsedTime;
 
       // 1. Update island lifecycle (CPU)
@@ -60,25 +60,26 @@ export class Renderer {
       // 2. Generate flow field
       this.flowField.update(time, this.threeRenderer);
 
-      // 3. Stamp islands
-      this.islandStampPass.update(
+      // 3. Update island body (stamp emerging + erode existing)
+      this.islandBodyPass.update(
         this.islandManager.getIslands(),
+        this.flowField.getTexture(),
         time,
         this.threeRenderer,
       );
 
-      // 4. Advect pigment
+      // 4. Advect pigment (reads body texture for emission + blocking)
       this.pigmentPass.update(
         this.flowField.getTexture(),
-        this.islandStampPass.getTexture(),
+        this.islandBodyPass.getTexture(),
         dt,
         this.threeRenderer,
       );
 
-      // 5. Composite to screen (pigment trails + solid island bodies)
+      // 5. Composite to screen
       this.compositePass.render(
         this.pigmentPass.getTexture(),
-        this.islandStampPass.getTexture(),
+        this.islandBodyPass.getTexture(),
         this.threeRenderer,
       );
     };
