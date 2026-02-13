@@ -26,17 +26,25 @@ void main() {
     vec2 delta = (vUv - uIslandPos[i]) * aspect;
     float rawDist = length(delta) / uIslandRadius[i];
 
-    // Low-frequency noise to wobble the pebble outline
-    // delta is in island-local space, so *6.0 gives ~1 wobble cycle across the island
-    float wobble = snoise(delta * 6.0 + float(i) * 13.7) * 0.08;
-    float dist = rawDist + wobble;
+    // Irregular pebble shape: use angle-dependent noise to break the circle
+    // Convert to polar angle for angular variation
+    float angle = atan(delta.y, delta.x);
+    // Multiple noise octaves at different angular frequencies for natural stone shape
+    float angularWarp = snoise(vec2(angle * 1.5, float(i) * 7.1)) * 0.15
+                      + snoise(vec2(angle * 3.0, float(i) * 13.7)) * 0.08
+                      + snoise(vec2(angle * 5.0, float(i) * 23.3)) * 0.04;
+    float dist = rawDist + angularWarp;
 
     // Solid pebble shape: fully opaque inside, soft at very edge
-    float shape = 1.0 - smoothstep(0.8, 1.0, dist);
+    float shape = 1.0 - smoothstep(0.75, 0.95, dist);
 
-    // Emergence: center appears first, grows outward
+    // Emergence: center appears first, grows outward with a wide soft gradient
+    // emergeProgress 0→1 maps to emergeThresh 1→0 (front moves outward)
     float emergeThresh = 1.0 - uIslandEmerge[i];
-    float emerged = smoothstep(emergeThresh + 0.02, emergeThresh - 0.02, dist);
+    // Wide transition band (0.15) so the edge fades in gradually, not pops
+    float emerged = smoothstep(emergeThresh + 0.15, emergeThresh - 0.05, dist);
+    // Overall opacity ramps up during emergence for a "rising from water" feel
+    float emergeOpacity = smoothstep(0.0, 0.4, uIslandEmerge[i]);
 
     // Erosion: front moves from outside in, with noise breakup
     // CRITICAL: scale noise by erode progress so it's zero before erosion starts
@@ -45,7 +53,7 @@ void main() {
     // Reversed args: returns 1 inside body (dist < erodeFront), 0 outside (eroded away)
     float eroded = smoothstep(erodeFront + 0.03, erodeFront - 0.03, dist);
 
-    float density = shape * emerged * eroded * uPigmentIntensity;
+    float density = shape * emerged * eroded * emergeOpacity * uPigmentIntensity;
 
     if (density > result.a) {
       result = vec4(uIslandColor[i], density);
