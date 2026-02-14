@@ -8,6 +8,8 @@ import { CompositePass } from '../rendering/CompositePass';
 import { InputHandler } from '../input/InputHandler';
 import { AudioManager } from '../audio/AudioManager';
 
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 export class Renderer {
   private threeRenderer: THREE.WebGLRenderer;
   private flowField: NavierStokesField;
@@ -19,6 +21,8 @@ export class Renderer {
   private audioManager: AudioManager;
   private audioStarted = false;
   private clock: THREE.Clock;
+  private frameBudget: number;
+  private lastRenderTime = 0;
 
   constructor() {
     this.threeRenderer = new THREE.WebGLRenderer({ antialias: false });
@@ -26,10 +30,15 @@ export class Renderer {
     this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.threeRenderer.domElement);
 
+    // 30fps cap on mobile, uncapped on desktop
+    this.frameBudget = isMobile ? 1000 / 30 : 0;
+
     const w = Math.floor(window.innerWidth * CONFIG.simScale);
     const h = Math.floor(window.innerHeight * CONFIG.simScale);
+    const fw = Math.floor(window.innerWidth * CONFIG.flowScale);
+    const fh = Math.floor(window.innerHeight * CONFIG.flowScale);
 
-    this.flowField = new NavierStokesField(w, h);
+    this.flowField = new NavierStokesField(fw, fh);
     this.islandManager = new IslandManager();
     this.islandBodyPass = new IslandBodyPass(w, h);
     this.pigmentPass = new PigmentPass(w, h);
@@ -83,7 +92,9 @@ export class Renderer {
 
     const w = Math.floor(width * CONFIG.simScale);
     const h = Math.floor(height * CONFIG.simScale);
-    this.flowField.resize(w, h);
+    const fw = Math.floor(width * CONFIG.flowScale);
+    const fh = Math.floor(height * CONFIG.flowScale);
+    this.flowField.resize(fw, fh);
     this.islandBodyPass.resize(w, h);
     this.pigmentPass.resize(w, h);
   };
@@ -91,6 +102,13 @@ export class Renderer {
   start(): void {
     const animate = (): void => {
       requestAnimationFrame(animate);
+
+      // Throttle frame rate on mobile
+      if (this.frameBudget > 0) {
+        const now = performance.now();
+        if (now - this.lastRenderTime < this.frameBudget) return;
+        this.lastRenderTime = now;
+      }
 
       const dt = Math.min(this.clock.getDelta(), 0.05);
       const time = this.clock.elapsedTime;

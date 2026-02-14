@@ -1,6 +1,8 @@
 export const CONFIG = {
   // Simulation resolution (can be lower than screen for performance)
   simScale: 1.0,
+  // Flow field runs at half resolution (low-frequency, bilinear-sampled)
+  flowScale: 0.5,
 
   // Flow field
   flow: {
@@ -40,7 +42,7 @@ export const CONFIG = {
 
   // Navier-Stokes solver
   navierStokes: {
-    pressureIterations: 40,
+    pressureIterations: 20,
     baseSpeed: 0.25,             // upward base flow target
     curlStrength: 0.06,          // subtle noise perturbation
     timestep: 8,                 // advection step (~2 grid cells at base velocity)
