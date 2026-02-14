@@ -24,15 +24,27 @@ void main() {
   vec4 advected = texture2D(uPrevPigment, clamp(sourceUv, vec2(0.0), vec2(1.0)));
   if (sourceUv.y < 0.0 || sourceUv.y > 1.0) advected = vec4(0.0);
 
-  // Diffusion: blend with neighbors for softness
+  // Diffusion: 3x3 weighted blur for smooth spreading (handles diagonal aliasing)
   // For top/bottom edges, treat off-screen neighbors as empty so pigment flows out
-  vec4 left  = texture2D(uPrevPigment, vUv + vec2(-uTexelSize.x, 0.0));
-  vec4 right = texture2D(uPrevPigment, vUv + vec2( uTexelSize.x, 0.0));
-  float upY = vUv.y + uTexelSize.y;
-  float downY = vUv.y - uTexelSize.y;
-  vec4 up   = upY   > 1.0 ? vec4(0.0) : texture2D(uPrevPigment, vec2(vUv.x, upY));
-  vec4 down = downY < 0.0 ? vec4(0.0) : texture2D(uPrevPigment, vec2(vUv.x, downY));
-  vec4 neighbors = (left + right + up + down) * 0.25;
+  vec4 neighbors = vec4(0.0);
+  float totalWeight = 0.0;
+  for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -1; dx <= 1; dx++) {
+      if (dx == 0 && dy == 0) continue;
+      vec2 offset = vec2(float(dx) * uTexelSize.x, float(dy) * uTexelSize.y);
+      vec2 sampleUv = vUv + offset;
+      // Weight: 1.0 for cardinal, 0.707 for diagonal (1/sqrt2)
+      float w = (dx == 0 || dy == 0) ? 1.0 : 0.707;
+      if (sampleUv.y < 0.0 || sampleUv.y > 1.0) {
+        // off-screen: contribute zero (weighted)
+        totalWeight += w;
+      } else {
+        neighbors += texture2D(uPrevPigment, sampleUv) * w;
+        totalWeight += w;
+      }
+    }
+  }
+  neighbors /= totalWeight;
 
   vec4 pigment = mix(advected, neighbors, uDiffusion);
 

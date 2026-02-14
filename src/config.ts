@@ -14,7 +14,7 @@ export const CONFIG = {
   // Pigment advection
   pigment: {
     advectionStrength: 0.6,
-    diffusion: 0.3,          // smooth smoky trails
+    diffusion: 0.42,         // smooth smoky trails (higher = less aliasing near small islands)
     decay: 0.997,            // multiplicative decay per frame
   },
 
@@ -36,6 +36,15 @@ export const CONFIG = {
     holdGrowRate: 0.04,        // radius units per second while holding
     minRadius: 0.04,           // starting radius on click
     maxRadius: 0.14,           // cap (same as current max)
+  },
+
+  // Navier-Stokes solver
+  navierStokes: {
+    pressureIterations: 40,
+    baseSpeed: 0.25,             // upward base flow target
+    curlStrength: 0.06,          // subtle noise perturbation
+    timestep: 8,                 // advection step (~2 grid cells at base velocity)
+    forceBlend: 0.05,            // how quickly velocity relaxes toward target flow
   },
 
   // Composite

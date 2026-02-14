@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CONFIG } from '../config';
-import { FlowField } from '../simulation/FlowField';
+import { NavierStokesField } from '../simulation/NavierStokesField';
 import { IslandManager } from '../island/IslandManager';
 import { IslandBodyPass } from '../rendering/IslandBodyPass';
 import { PigmentPass } from '../rendering/PigmentPass';
@@ -10,7 +10,7 @@ import { AudioManager } from '../audio/AudioManager';
 
 export class Renderer {
   private threeRenderer: THREE.WebGLRenderer;
-  private flowField: FlowField;
+  private flowField: NavierStokesField;
   private islandManager: IslandManager;
   private islandBodyPass: IslandBodyPass;
   private pigmentPass: PigmentPass;
@@ -29,7 +29,7 @@ export class Renderer {
     const w = Math.floor(window.innerWidth * CONFIG.simScale);
     const h = Math.floor(window.innerHeight * CONFIG.simScale);
 
-    this.flowField = new FlowField(w, h);
+    this.flowField = new NavierStokesField(w, h);
     this.islandManager = new IslandManager();
     this.islandBodyPass = new IslandBodyPass(w, h);
     this.pigmentPass = new PigmentPass(w, h);
@@ -99,7 +99,8 @@ export class Renderer {
       this.islandManager.updateHoldingIsland(dt);
       this.islandManager.update(dt);
 
-      // 2. Generate flow field
+      // 2. Generate flow field (pass obstacle data from island body)
+      this.flowField.setObstacles(this.islandBodyPass.getTexture().texture);
       this.flowField.update(time, this.threeRenderer);
 
       // 3. Update island body (stamp emerging + erode existing)

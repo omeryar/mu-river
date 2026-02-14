@@ -4,8 +4,8 @@
   "private": true,
   "source": "src/index.html",
   "scripts": {
-    "dev": "parcel src/index.html --open",
-    "build": "parcel build src/index.html"
+    "dev": "rm -rf .parcel-cache && parcel src/index.html",
+    "build": "rm -rf .parcel-cache && parcel build src/index.html"
   },
   "devDependencies": {
     "@parcel/transformer-glsl": "^2.16.4",
