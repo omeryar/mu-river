@@ -26,7 +26,7 @@ export class Renderer {
 
   constructor() {
     this.threeRenderer = new THREE.WebGLRenderer({ antialias: false });
-    this.threeRenderer.setPixelRatio(window.devicePixelRatio);
+    this.threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.threeRenderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.threeRenderer.domElement);
 

@@ -5,6 +5,7 @@ uniform sampler2D uFlowField;   // flow velocity
 uniform vec2 uTexelSize;
 uniform float uTime;
 uniform float uErodeRate;
+uniform float uGlobalDecay;
 
 // Islands to stamp (only during emergence phase)
 #define MAX_ISLANDS 24
@@ -119,6 +120,12 @@ void main() {
       body.a -= erodeAmount;
       body.a = max(0.0, body.a);
     }
+  }
+
+  // Global alpha decay: ensures linear mass loss and no lingering remnants
+  if (body.a > 0.0) {
+    body.a -= uGlobalDecay;
+    body.a = max(0.0, body.a);
   }
 
   gl_FragColor = body;

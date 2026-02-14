@@ -1,6 +1,6 @@
 export const CONFIG = {
   // Simulation resolution (can be lower than screen for performance)
-  simScale: 1.0,
+  simScale: 0.5,
   // Flow field runs at half resolution (low-frequency, bilinear-sampled)
   flowScale: 0.5,
 
@@ -29,6 +29,7 @@ export const CONFIG = {
     radiusRange: [0.06, 0.14] as [number, number], // normalized to screen height
     pigmentIntensity: 0.8,
     erodeRate: 0.018,        // per-frame erosion rate for exposed edge pixels
+    globalDecay: 0.0004,     // per-frame uniform alpha decay (gentle cleanup, ~42s full fade at 60fps)
   },
 
   // Active mode (user-placed islands)

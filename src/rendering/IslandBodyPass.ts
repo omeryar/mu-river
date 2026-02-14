@@ -44,6 +44,7 @@ export class IslandBodyPass {
         uTexelSize: { value: new THREE.Vector2(1 / width, 1 / height) },
         uTime: { value: 0 },
         uErodeRate: { value: CONFIG.island.erodeRate },
+        uGlobalDecay: { value: CONFIG.island.globalDecay },
         uIslandCount: { value: 0 },
         uIslandPos: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector2()) },
         uIslandRadius: { value: new Float32Array(MAX_ISLANDS) },
