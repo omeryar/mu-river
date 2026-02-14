@@ -17,15 +17,21 @@ void main() {
 
   // Semi-Lagrangian advection: look backward along velocity
   vec2 sourceUv = vUv - velocity * uAdvectionStrength * uDt;
-  sourceUv = clamp(sourceUv, vec2(0.0), vec2(1.0));
+  sourceUv.x = clamp(sourceUv.x, 0.0, 1.0);
 
-  vec4 advected = texture2D(uPrevPigment, sourceUv);
+  // Let pigment flow off top/bottom edges — sample returns edge color
+  // but we zero it out if the source is off-screen
+  vec4 advected = texture2D(uPrevPigment, clamp(sourceUv, vec2(0.0), vec2(1.0)));
+  if (sourceUv.y < 0.0 || sourceUv.y > 1.0) advected = vec4(0.0);
 
   // Diffusion: blend with neighbors for softness
+  // For top/bottom edges, treat off-screen neighbors as empty so pigment flows out
   vec4 left  = texture2D(uPrevPigment, vUv + vec2(-uTexelSize.x, 0.0));
   vec4 right = texture2D(uPrevPigment, vUv + vec2( uTexelSize.x, 0.0));
-  vec4 up    = texture2D(uPrevPigment, vUv + vec2(0.0,  uTexelSize.y));
-  vec4 down  = texture2D(uPrevPigment, vUv + vec2(0.0, -uTexelSize.y));
+  float upY = vUv.y + uTexelSize.y;
+  float downY = vUv.y - uTexelSize.y;
+  vec4 up   = upY   > 1.0 ? vec4(0.0) : texture2D(uPrevPigment, vec2(vUv.x, upY));
+  vec4 down = downY < 0.0 ? vec4(0.0) : texture2D(uPrevPigment, vec2(vUv.x, downY));
   vec4 neighbors = (left + right + up + down) * 0.25;
 
   vec4 pigment = mix(advected, neighbors, uDiffusion);
@@ -51,8 +57,10 @@ void main() {
   pigment.rgb = mix(pigment.rgb, stamp.rgb, emitAmount);
   pigment.a = max(pigment.a, emitAmount);
 
-  // Fade pigment flowing off the top edge
-  pigment *= smoothstep(1.0, 0.95, vUv.y);
+  // Gentle fade at the very edge (2 texels) so pigment vanishes smoothly off-screen
+  float edgeFade = smoothstep(1.0, 1.0 - uTexelSize.y * 2.0, vUv.y)
+                 * smoothstep(0.0, uTexelSize.y * 2.0, vUv.y);
+  pigment *= edgeFade;
 
   gl_FragColor = pigment;
 }
