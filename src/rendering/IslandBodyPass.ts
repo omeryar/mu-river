@@ -6,7 +6,7 @@ import { injectNoise } from './shaders/injectNoise';
 
 const islandBodyFrag = injectNoise(islandBodyFragRaw);
 
-const MAX_ISLANDS = 8;
+const MAX_ISLANDS = 24;
 
 const VERT = /* glsl */ `
 varying vec2 vUv;

@@ -29,6 +29,15 @@ export const CONFIG = {
     erodeRate: 0.018,        // per-frame erosion rate for exposed edge pixels
   },
 
+  // Active mode (user-placed islands)
+  activeMode: {
+    maxConcurrent: 20,
+    inactivityTimeout: 30,     // seconds before reverting to observer
+    holdGrowRate: 0.04,        // radius units per second while holding
+    minRadius: 0.04,           // starting radius on click
+    maxRadius: 0.14,           // cap (same as current max)
+  },
+
   // Composite
   composite: {
     baseColor: [0.95, 0.93, 0.90],  // warm white river

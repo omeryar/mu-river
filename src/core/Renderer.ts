@@ -5,6 +5,7 @@ import { IslandManager } from '../island/IslandManager';
 import { IslandBodyPass } from '../rendering/IslandBodyPass';
 import { PigmentPass } from '../rendering/PigmentPass';
 import { CompositePass } from '../rendering/CompositePass';
+import { InputHandler } from '../input/InputHandler';
 
 export class Renderer {
   private threeRenderer: THREE.WebGLRenderer;
@@ -13,6 +14,7 @@ export class Renderer {
   private islandBodyPass: IslandBodyPass;
   private pigmentPass: PigmentPass;
   private compositePass: CompositePass;
+  private inputHandler: InputHandler;
   private clock: THREE.Clock;
 
   constructor() {
@@ -32,7 +34,38 @@ export class Renderer {
 
     this.clock = new THREE.Clock();
 
+    const canvas = this.threeRenderer.domElement;
+    this.inputHandler = new InputHandler(canvas, {
+      onPress: (uv) => {
+        this.islandManager.switchToActive();
+        this.islandManager.resetInactivityTimer();
+        const spawned = this.islandManager.spawnAtPosition(uv);
+        if (!spawned) {
+          // Show rejection ripple at screen position
+          const screenX = uv[0] * canvas.clientWidth;
+          const screenY = (1 - uv[1]) * canvas.clientHeight;
+          this.showRejectRipple(screenX, screenY);
+        }
+      },
+      onHoldUpdate: () => {
+        this.islandManager.resetInactivityTimer();
+      },
+      onRelease: (_uv, _duration) => {
+        this.islandManager.releaseHoldingIsland();
+        this.islandManager.resetInactivityTimer();
+      },
+    });
+
     window.addEventListener('resize', this.onResize);
+  }
+
+  private showRejectRipple(x: number, y: number): void {
+    const el = document.createElement('div');
+    el.className = 'reject-ripple';
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
   }
 
   private onResize = (): void => {
@@ -54,7 +87,8 @@ export class Renderer {
       const dt = Math.min(this.clock.getDelta(), 0.05);
       const time = this.clock.elapsedTime;
 
-      // 1. Update island lifecycle (CPU)
+      // 1. Update island lifecycle (CPU) + grow held island
+      this.islandManager.updateHoldingIsland(dt);
       this.islandManager.update(dt);
 
       // 2. Generate flow field

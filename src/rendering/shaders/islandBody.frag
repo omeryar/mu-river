@@ -7,7 +7,7 @@ uniform float uTime;
 uniform float uErodeRate;
 
 // Islands to stamp (only during emergence phase)
-#define MAX_ISLANDS 8
+#define MAX_ISLANDS 24
 uniform int uIslandCount;
 uniform vec2 uIslandPos[MAX_ISLANDS];
 uniform float uIslandRadius[MAX_ISLANDS];
