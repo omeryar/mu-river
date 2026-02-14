@@ -6,6 +6,7 @@ import { IslandBodyPass } from '../rendering/IslandBodyPass';
 import { PigmentPass } from '../rendering/PigmentPass';
 import { CompositePass } from '../rendering/CompositePass';
 import { InputHandler } from '../input/InputHandler';
+import { AudioManager } from '../audio/AudioManager';
 
 export class Renderer {
   private threeRenderer: THREE.WebGLRenderer;
@@ -15,6 +16,8 @@ export class Renderer {
   private pigmentPass: PigmentPass;
   private compositePass: CompositePass;
   private inputHandler: InputHandler;
+  private audioManager: AudioManager;
+  private audioStarted = false;
   private clock: THREE.Clock;
 
   constructor() {
@@ -32,11 +35,16 @@ export class Renderer {
     this.pigmentPass = new PigmentPass(w, h);
     this.compositePass = new CompositePass();
 
+    this.audioManager = new AudioManager();
     this.clock = new THREE.Clock();
 
     const canvas = this.threeRenderer.domElement;
     this.inputHandler = new InputHandler(canvas, {
       onPress: (uv) => {
+        if (!this.audioStarted) {
+          this.audioStarted = true;
+          this.audioManager.start();
+        }
         this.islandManager.switchToActive();
         this.islandManager.resetInactivityTimer();
         const spawned = this.islandManager.spawnAtPosition(uv);
