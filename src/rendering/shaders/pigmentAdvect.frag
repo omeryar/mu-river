@@ -55,10 +55,9 @@ void main() {
   vec4 stamp = texture2D(uIslandStamp, vUv);
   float bodyAlpha = stamp.a;
 
-  // Emit pigment where body density is in transition (the erosion front).
-  // bell curve: peaks at alpha ~0.5 (the soft edge of erosion), zero at 0 and 1.
-  // This naturally finds erosion fronts without needing edge detection.
-  float emitCurve = bodyAlpha * (1.0 - bodyAlpha) * 4.0;
+  // Emit pigment at the erosion front. Narrow band centered at alpha ~0.5
+  // with sharp falloff to prevent halo buildup in stagnation zones.
+  float emitCurve = smoothstep(0.15, 0.4, bodyAlpha) * smoothstep(0.85, 0.6, bodyAlpha);
   float emitAmount = emitCurve * 0.7;
 
   // Block existing pigment flow through solid body interior
