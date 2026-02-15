@@ -62,9 +62,7 @@ export class IslandManager {
     const activeCount = this.islands.filter(i => i.erodeProgress < 0.8).length;
     if (activeCount >= maxCount) return null;
 
-    // Overlap check: distance between centers < sum of radii
     const newRadius = CONFIG.activeMode.minRadius;
-    if (this.overlapsExisting(uv, newRadius)) return null;
 
     const color = PALETTE[this.paletteIndex % PALETTE.length];
     this.paletteIndex++;
@@ -87,20 +85,6 @@ export class IslandManager {
     this.islands.push(island);
     this.holdingIslandId = island.id;
     return island;
-  }
-
-  /** Check if a circle at `pos` with `radius` overlaps any active island. */
-  private overlapsExisting(pos: [number, number], radius: number): boolean {
-    for (const existing of this.islands) {
-      if (existing.erodeProgress > 0.6) continue;
-      const dx = pos[0] - existing.position[0];
-      const dy = pos[1] - existing.position[1];
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < existing.radius + radius) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /** Grow the currently-held island's radius up to max. */
@@ -167,16 +151,7 @@ export class IslandManager {
   private autoSpawn(): void {
     const radius = randRange(CONFIG.island.radiusRange);
 
-    // Try a few random positions, bail if all overlap
-    let position: [number, number] | null = null;
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const candidate: [number, number] = [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.5];
-      if (!this.overlapsExisting(candidate, radius)) {
-        position = candidate;
-        break;
-      }
-    }
-    if (!position) return;
+    const position: [number, number] = [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.5];
 
     const color = PALETTE[this.paletteIndex % PALETTE.length];
     this.paletteIndex++;
