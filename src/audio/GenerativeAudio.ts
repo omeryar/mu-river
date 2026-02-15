@@ -53,7 +53,10 @@ export class GenerativeAudio {
     return buffer;
   }
 
-  private startDrone(): void {
+  /**
+   * Start the background drone. Must be called within a user gesture on iOS.
+   */
+  startDrone(): void {
     if (this.droneOsc) return;
     this.droneOsc = this.ctx.createOscillator();
     this.droneOsc.type = 'sine';
@@ -67,7 +70,6 @@ export class GenerativeAudio {
    */
   update(islands: readonly Island[], dt?: number): void {
     if (dt !== undefined) this.lastDt = dt;
-    this.startDrone();
 
     const activeIds = new Set<number>();
 

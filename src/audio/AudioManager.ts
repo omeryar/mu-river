@@ -30,6 +30,8 @@ export class AudioManager {
       if (this.ctx.state === 'suspended') {
         this.ctx.resume();
       }
+      // Start drone within user gesture so iOS allows playback
+      this.generativeAudio!.startDrone();
       this.playing = true;
       this.sliderWrap.classList.add('visible');
     } else {
