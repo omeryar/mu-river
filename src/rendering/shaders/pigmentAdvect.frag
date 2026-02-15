@@ -58,7 +58,7 @@ void main() {
   // Emit pigment at the erosion front. Narrow band centered at alpha ~0.5
   // with sharp falloff to prevent halo buildup in stagnation zones.
   float emitCurve = smoothstep(0.15, 0.4, bodyAlpha) * smoothstep(0.85, 0.6, bodyAlpha);
-  float emitAmount = emitCurve * 0.7;
+  float emitAmount = emitCurve * 0.9;
 
   // Block existing pigment flow through solid body interior
   float blockFactor = 1.0 - smoothstep(0.5, 0.9, bodyAlpha);

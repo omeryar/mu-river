@@ -16,8 +16,8 @@ export const CONFIG = {
   // Pigment advection
   pigment: {
     advectionStrength: 0.6,
-    diffusion: 0.42,         // smooth smoky trails (higher = less aliasing near small islands)
-    decay: 0.997,            // multiplicative decay per frame
+    diffusion: 0.25,         // lower = thinner plumes near source, curls thicken them downstream
+    decay: 0.998,            // slower decay so plumes carry farther
   },
 
   // Islands
@@ -53,6 +53,6 @@ export const CONFIG = {
   // Composite
   composite: {
     baseColor: [0.95, 0.93, 0.90],  // warm white river
-    pigmentOpacity: 0.85,
+    pigmentOpacity: 0.95,
   },
 } as const;

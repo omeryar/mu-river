@@ -19,7 +19,6 @@ export class Renderer {
   private compositePass: CompositePass;
   private inputHandler: InputHandler;
   private audioManager: AudioManager;
-  private audioStarted = false;
   private clock: THREE.Clock;
   private frameBudget: number;
   private lastRenderTime = 0;
@@ -50,10 +49,6 @@ export class Renderer {
     const canvas = this.threeRenderer.domElement;
     this.inputHandler = new InputHandler(canvas, {
       onPress: (uv) => {
-        if (!this.audioStarted) {
-          this.audioStarted = true;
-          this.audioManager.start();
-        }
         this.islandManager.switchToActive();
         this.islandManager.resetInactivityTimer();
         const spawned = this.islandManager.spawnAtPosition(uv);

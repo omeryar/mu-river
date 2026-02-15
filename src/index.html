@@ -49,6 +49,45 @@
     }
     #mute-btn.visible { opacity: 1; }
     #mute-btn:hover { background: rgba(0, 0, 0, 0.4); }
+    #volume-wrap {
+      position: fixed;
+      bottom: 62px;
+      right: 16px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #volume-wrap.visible { opacity: 1; pointer-events: auto; }
+    #volume-slider {
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      writing-mode: vertical-lr;
+      direction: rtl;
+      width: 3px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      outline: none;
+    }
+    #volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
