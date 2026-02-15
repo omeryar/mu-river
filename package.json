@@ -5,10 +5,12 @@
   "source": "src/index.html",
   "scripts": {
     "dev": "rm -rf .parcel-cache && parcel src/index.html",
-    "build": "rm -rf .parcel-cache && parcel build src/index.html"
+    "build": "rm -rf .parcel-cache && parcel build src/index.html --public-url ./"
   },
   "devDependencies": {
+    "@parcel/packager-raw-url": "^2.16.4",
     "@parcel/transformer-glsl": "^2.16.4",
+    "@parcel/transformer-webmanifest": "^2.16.4",
     "parcel": "^2.16.4",
     "typescript": "^5.7.0"
   },
