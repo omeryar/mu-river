@@ -138,6 +138,9 @@ export class Renderer {
         this.islandBodyPass.getTexture(),
         this.threeRenderer,
       );
+
+      // 6. Update audio voices to match island state
+      this.audioManager.update(this.islandManager.getIslands(), dt);
     };
 
     animate();

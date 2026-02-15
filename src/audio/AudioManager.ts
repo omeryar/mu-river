@@ -1,14 +1,16 @@
-const audioUrl = new URL('../../assets/MoonRiver_32x.mp3', import.meta.url);
+import { Island } from '../island/Island';
+import { GenerativeAudio } from './GenerativeAudio';
 
 const ICON_UNMUTED = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
 
 const ICON_MUTED = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
 
 export class AudioManager {
-  private audio: HTMLAudioElement | null = null;
+  private ctx: AudioContext | null = null;
+  private generativeAudio: GenerativeAudio | null = null;
   private playing = false;
   private button: HTMLButtonElement;
-  private slider: HTMLInputElement;
+  private slider!: HTMLInputElement;
   private sliderWrap: HTMLDivElement;
   private volume = 0.5;
 
@@ -19,21 +21,31 @@ export class AudioManager {
 
   private toggle(): void {
     if (!this.playing) {
-      // First time or resuming — create audio element if needed
-      if (!this.audio) {
-        this.audio = new Audio(audioUrl.href);
-        this.audio.loop = true;
-        this.audio.volume = this.volume;
+      // Create AudioContext on first user gesture
+      if (!this.ctx) {
+        this.ctx = new AudioContext();
+        this.generativeAudio = new GenerativeAudio(this.ctx);
+        this.generativeAudio.setVolume(this.volume);
       }
-      this.audio.play();
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
       this.playing = true;
       this.sliderWrap.classList.add('visible');
     } else {
-      this.audio!.pause();
+      this.generativeAudio!.stop();
       this.playing = false;
       this.sliderWrap.classList.remove('visible');
     }
     this.updateButtonLabel();
+  }
+
+  /**
+   * Called each frame from the render loop with current island state.
+   */
+  update(islands: readonly Island[], dt: number): void {
+    if (!this.playing || !this.generativeAudio) return;
+    this.generativeAudio.update(islands, dt);
   }
 
   private createMuteButton(): HTMLButtonElement {
@@ -65,7 +77,7 @@ export class AudioManager {
 
     const updateVolume = () => {
       this.volume = parseFloat(slider.value);
-      if (this.audio) this.audio.volume = this.volume;
+      if (this.generativeAudio) this.generativeAudio.setVolume(this.volume);
     };
     slider.addEventListener('input', (e) => { e.stopPropagation(); updateVolume(); });
     slider.addEventListener('change', (e) => { e.stopPropagation(); updateVolume(); });
