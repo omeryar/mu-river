@@ -17,7 +17,7 @@ export const CONFIG = {
   pigment: {
     advectionStrength: 0.6,
     diffusion: 0.25,         // lower = thinner plumes near source, curls thicken them downstream
-    decay: 0.998,            // slower decay so plumes carry farther
+    decay: 0.999,            // very slow decay for long flowing plumes
   },
 
   // Islands
