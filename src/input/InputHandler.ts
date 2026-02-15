@@ -1,4 +1,4 @@
-const MIN_HOLD_MS = 150; // ignore taps shorter than this
+const MIN_HOLD_MS = 60; // ignore taps shorter than this
 
 export interface InputCallbacks {
   onPress(uv: [number, number]): void;
@@ -19,14 +19,14 @@ export class InputHandler {
     this.canvas = canvas;
     this.callbacks = callbacks;
 
-    canvas.addEventListener('pointerdown', this.onPointerDown);
-    canvas.addEventListener('pointermove', this.onPointerMove);
-    canvas.addEventListener('pointerup', this.onPointerUp);
-    canvas.addEventListener('pointercancel', this.onPointerUp);
+    canvas.addEventListener("pointerdown", this.onPointerDown);
+    canvas.addEventListener("pointermove", this.onPointerMove);
+    canvas.addEventListener("pointerup", this.onPointerUp);
+    canvas.addEventListener("pointercancel", this.onPointerUp);
     // Prevent touch scrolling and text selection on canvas
-    canvas.style.touchAction = 'none';
-    canvas.style.userSelect = 'none';
-    canvas.style.webkitUserSelect = 'none';
+    canvas.style.touchAction = "none";
+    canvas.style.userSelect = "none";
+    canvas.style.webkitUserSelect = "none";
   }
 
   private screenToUV(e: PointerEvent): [number, number] {
