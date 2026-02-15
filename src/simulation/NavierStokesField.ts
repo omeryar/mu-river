@@ -91,6 +91,7 @@ export class NavierStokesField implements IFlowField {
     this.jacobiPass = createPass(jacobiFrag, {
       uX: { value: null },
       uB: { value: null },
+      uObstacles: { value: null },
       uTexelSize: ts,
       uAlpha: { value: 0 },
       uInvBeta: { value: 0 },
@@ -104,6 +105,7 @@ export class NavierStokesField implements IFlowField {
     this.gradientPass = createPass(gradientFrag, {
       uPressure: { value: null },
       uVelocity: { value: null },
+      uObstacles: { value: null },
       uTexelSize: ts,
     });
 
@@ -217,6 +219,7 @@ export class NavierStokesField implements IFlowField {
     ju.uAlpha.value = -1.0; // -dx^2
     ju.uInvBeta.value = 0.25; // 1/4
     ju.uB.value = this.divergenceRT.texture;
+    ju.uObstacles.value = obstacles;
 
     for (let i = 0; i < ns.pressureIterations; i++) {
       ju.uX.value = this.presRead.texture;
@@ -228,6 +231,7 @@ export class NavierStokesField implements IFlowField {
     const gu = this.gradientPass.material.uniforms;
     gu.uPressure.value = this.presRead.texture;
     gu.uVelocity.value = this.velRead.texture;
+    gu.uObstacles.value = obstacles;
     this.renderPass(this.gradientPass, this.velWrite, renderer);
     this.swapVelocity();
   }

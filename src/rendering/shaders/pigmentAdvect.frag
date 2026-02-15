@@ -23,6 +23,10 @@ void main() {
   vec4 advected = texture2D(uPrevPigment, clamp(sourceUv, vec2(0.0), vec2(1.0)));
   if (sourceUv.y < 0.0 || sourceUv.y > 1.0) advected = vec4(0.0);
 
+  // Don't pull pigment from inside obstacles
+  float sourceObs = texture2D(uIslandStamp, clamp(sourceUv, vec2(0.0), vec2(1.0))).a;
+  if (sourceObs > 0.5) advected = vec4(0.0);
+
   // Diffusion: 3x3 weighted blur for smooth spreading (handles diagonal aliasing)
   // For top/bottom edges, treat off-screen neighbors as empty so pigment flows out
   vec4 neighbors = vec4(0.0);
@@ -36,6 +40,9 @@ void main() {
       float w = (dx == 0 || dy == 0) ? 1.0 : 0.707;
       if (sampleUv.y < 0.0 || sampleUv.y > 1.0) {
         // off-screen: contribute zero (weighted)
+        totalWeight += w;
+      } else if (texture2D(uIslandStamp, sampleUv).a > 0.5) {
+        // neighbor is inside obstacle: contribute zero (don't diffuse through solids)
         totalWeight += w;
       } else {
         neighbors += texture2D(uPrevPigment, sampleUv) * w;
