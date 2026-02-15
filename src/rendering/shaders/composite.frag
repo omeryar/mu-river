@@ -18,10 +18,12 @@ void main() {
   float pigmentAlpha = pigment.a * uPigmentOpacity;
   color = mix(color, pigment.rgb, pigmentAlpha);
 
-  // Layer 3: solid island body on top (stationary, opaque)
-  // Darken island color slightly toward center for depth
-  vec3 islandColor = island.rgb * (0.7 + 0.3 * (1.0 - island.a));
-  color = mix(color, islandColor, island.a);
+  // Layer 3: island body — watercolor style (translucent, soft edges)
+  // Soft alpha curve: cap opacity so islands feel like pigment stains, not solid objects
+  float islandAlpha = smoothstep(0.0, 0.6, island.a) * 0.75;
+  // Gentle interior shading — barely darker at center, mostly flat wash
+  vec3 islandColor = island.rgb * (0.85 + 0.15 * (1.0 - island.a));
+  color = mix(color, islandColor, islandAlpha);
 
   gl_FragColor = vec4(color, 1.0);
 }

@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { CONFIG } from '../config';
-import pigmentAdvectFrag from './shaders/pigmentAdvect.frag';
+import pigmentAdvectFragRaw from './shaders/pigmentAdvect.frag';
+import { injectNoise } from './shaders/injectNoise';
+
+const pigmentAdvectFrag = injectNoise(pigmentAdvectFragRaw);
 
 const VERT = /* glsl */ `
 varying vec2 vUv;
@@ -41,6 +44,7 @@ export class PigmentPass {
         uDecay: { value: CONFIG.pigment.decay },
         uDt: { value: 0 },
         uTexelSize: { value: new THREE.Vector2(1 / width, 1 / height) },
+        uTime: { value: 0 },
       },
     });
 
@@ -58,6 +62,7 @@ export class PigmentPass {
     islandStampTex: THREE.WebGLRenderTarget,
     dt: number,
     renderer: THREE.WebGLRenderer,
+    time: number = 0,
   ): void {
     const prev = this.current;
     const next = 1 - this.current;
@@ -67,6 +72,7 @@ export class PigmentPass {
     u.uFlowField.value = flowFieldTex.texture;
     u.uIslandStamp.value = islandStampTex.texture;
     u.uDt.value = dt;
+    u.uTime.value = time;
 
     renderer.setRenderTarget(this.targets[next]);
     renderer.render(this.scene, this.camera);

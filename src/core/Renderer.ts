@@ -130,6 +130,7 @@ export class Renderer {
         this.islandBodyPass.getTexture(),
         dt,
         this.threeRenderer,
+        time,
       );
 
       // 5. Composite to screen
