@@ -63,14 +63,18 @@ export class AudioManager {
     slider.value = String(this.volume);
     slider.id = 'volume-slider';
 
-    slider.addEventListener('input', (e) => {
-      e.stopPropagation();
+    const updateVolume = () => {
       this.volume = parseFloat(slider.value);
       if (this.audio) this.audio.volume = this.volume;
-    });
+    };
+    slider.addEventListener('input', (e) => { e.stopPropagation(); updateVolume(); });
+    slider.addEventListener('change', (e) => { e.stopPropagation(); updateVolume(); });
     // Prevent touch events from propagating to canvas
-    slider.addEventListener('pointerdown', (e) => e.stopPropagation());
-    slider.addEventListener('touchstart', (e) => e.stopPropagation());
+    for (const evt of ['pointerdown', 'touchstart', 'touchmove', 'touchend'] as const) {
+      slider.addEventListener(evt, (e) => e.stopPropagation());
+    }
+    wrap.addEventListener('pointerdown', (e) => e.stopPropagation());
+    wrap.addEventListener('touchstart', (e) => e.stopPropagation());
 
     wrap.appendChild(slider);
     document.body.appendChild(wrap);
