@@ -1,5 +1,6 @@
 import { Island } from '../island/Island';
 import { IslandVoice } from './IslandVoice';
+import { getNextMoonRiverStep } from './scales';
 
 export class GenerativeAudio {
   private ctx: AudioContext;
@@ -80,7 +81,8 @@ export class GenerativeAudio {
       let voice = this.voices.get(island.id);
       if (!voice) {
         // Each voice gets separate dry and wet (convolver) destinations
-        voice = new IslandVoice(island, this.ctx, this.dryGain, this.convolver);
+        const step = getNextMoonRiverStep();
+        voice = new IslandVoice(island.id, step, this.ctx, this.dryGain, this.convolver);
         this.voices.set(island.id, voice);
       }
       voice.update(island);

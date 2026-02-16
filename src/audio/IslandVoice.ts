@@ -1,5 +1,5 @@
 import { Island } from '../island/Island';
-import { colorToNote, colorToTimbre } from './scales';
+import { MoonRiverStep } from './scales';
 
 // Post-fade duration: how long the voice lingers after the island is gone,
 // matching the pigment plume dissipation (~decay 0.999/frame at 60fps).
@@ -8,28 +8,25 @@ const POST_FADE_DURATION = 15; // seconds
 export class IslandVoice {
   readonly islandId: number;
   private ctx: AudioContext;
-  private oscillator: OscillatorNode;
-  private oscillator2: OscillatorNode | null = null;
+  private melodyOsc: OscillatorNode;
+  private chordOscs: OscillatorNode[] = [];
   private gainNode: GainNode;
   private dryGain: GainNode;
   private wetGain: GainNode;
-  private filter: BiquadFilterNode | null = null;
   private stopped = false;
   private postFading = false;
   private postFadeElapsed = 0;
   private lastGain = 0; // gain at moment post-fade began
 
   constructor(
-    island: Island,
+    islandId: number,
+    step: MoonRiverStep,
     ctx: AudioContext,
     dryDest: AudioNode,
     wetDest: AudioNode,
   ) {
-    this.islandId = island.id;
+    this.islandId = islandId;
     this.ctx = ctx;
-
-    const freq = colorToNote(island.color);
-    const timbre = colorToTimbre(island.color);
 
     // Gain node (starts at 0 for attack)
     this.gainNode = ctx.createGain();
@@ -41,39 +38,34 @@ export class IslandVoice {
     this.wetGain = ctx.createGain();
     this.wetGain.gain.setValueAtTime(0.2, ctx.currentTime);
 
-    // Primary oscillator
-    this.oscillator = ctx.createOscillator();
-    this.oscillator.type = timbre.type;
-    this.oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+    // Primary melody oscillator — sine for dreamy quality
+    this.melodyOsc = ctx.createOscillator();
+    this.melodyOsc.type = 'sine';
+    this.melodyOsc.frequency.setValueAtTime(step.melody, ctx.currentTime);
+    this.melodyOsc.connect(this.gainNode);
 
-    // Optional second oscillator for detuned beating
-    if (timbre.detune > 0) {
-      this.oscillator2 = ctx.createOscillator();
-      this.oscillator2.type = timbre.type;
-      this.oscillator2.frequency.setValueAtTime(freq + timbre.detune, ctx.currentTime);
+    // Chord oscillators — quieter sine tones for harmonic bed
+    const chordGain = ctx.createGain();
+    chordGain.gain.setValueAtTime(0.25, ctx.currentTime);
+    chordGain.connect(this.gainNode);
+
+    for (const freq of step.chord) {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.connect(chordGain);
+      this.chordOscs.push(osc);
     }
 
-    // Optional low-pass filter
-    if (timbre.filterCutoff !== null) {
-      this.filter = ctx.createBiquadFilter();
-      this.filter.type = 'lowpass';
-      this.filter.frequency.setValueAtTime(timbre.filterCutoff, ctx.currentTime);
-      this.filter.Q.setValueAtTime(1, ctx.currentTime);
-    }
-
-    // Connect chain: osc(s) → filter? → gain → dry/wet → destinations
-    const preGain = this.filter || this.gainNode;
-    this.oscillator.connect(preGain);
-    if (this.oscillator2) this.oscillator2.connect(preGain);
-    if (this.filter) this.filter.connect(this.gainNode);
+    // Connect gain → dry/wet → destinations
     this.gainNode.connect(this.dryGain);
     this.gainNode.connect(this.wetGain);
     this.dryGain.connect(dryDest);
     this.wetGain.connect(wetDest);
 
-    // Start oscillators
-    this.oscillator.start();
-    if (this.oscillator2) this.oscillator2.start();
+    // Start all oscillators
+    this.melodyOsc.start();
+    for (const osc of this.chordOscs) osc.start();
   }
 
   /**
@@ -166,13 +158,12 @@ export class IslandVoice {
 
     setTimeout(() => {
       try {
-        this.oscillator.stop();
-        this.oscillator.disconnect();
-        if (this.oscillator2) {
-          this.oscillator2.stop();
-          this.oscillator2.disconnect();
+        this.melodyOsc.stop();
+        this.melodyOsc.disconnect();
+        for (const osc of this.chordOscs) {
+          osc.stop();
+          osc.disconnect();
         }
-        if (this.filter) this.filter.disconnect();
         this.gainNode.disconnect();
         this.dryGain.disconnect();
         this.wetGain.disconnect();
