@@ -4,15 +4,6 @@ export const CONFIG = {
   // Flow field runs at half resolution (low-frequency, bilinear-sampled)
   flowScale: 0.5,
 
-  // Flow field
-  flow: {
-    baseSpeed: 0.25,        // upward base flow strength
-    curlScale: 0.003,       // spatial frequency of curl noise
-    curlStrength: 0.08,     // curl perturbation for swirling plumes
-    octaves: 3,
-    timeScale: 0.05,        // how fast the flow evolves
-  },
-
   // Pigment advection
   pigment: {
     advectionStrength: 0.6,
@@ -27,7 +18,6 @@ export const CONFIG = {
     emergeDuration: [5, 20] as [number, number],   // seconds to fully emerge
     erodeDuration: [20, 60] as [number, number],   // seconds to fully erode
     radiusRange: [0.06, 0.14] as [number, number], // normalized to screen height
-    pigmentIntensity: 0.8,
     erodeRate: 0.018,        // per-frame erosion rate for exposed edge pixels
     globalDecay: 0.0004,     // per-frame uniform alpha decay (gentle cleanup, ~42s full fade at 60fps)
   },
@@ -46,6 +36,7 @@ export const CONFIG = {
     pressureIterations: 20,
     baseSpeed: 0.25,             // upward base flow target
     curlStrength: 0.08,          // curl for swirling turbulence (kept below baseSpeed)
+    curlScale: 0.003,            // spatial frequency of curl noise
     timestep: 8,                 // advection step (~2 grid cells at base velocity)
     forceBlend: 0.08,            // how quickly velocity relaxes toward target flow
   },

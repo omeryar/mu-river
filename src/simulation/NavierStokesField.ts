@@ -1,22 +1,20 @@
 import * as THREE from 'three';
 import { CONFIG } from '../config';
-import { IFlowField } from './FlowField';
 import advectFrag from '../rendering/shaders/ns/advect.frag';
 import jacobiFrag from '../rendering/shaders/ns/jacobi.frag';
 import divergenceFrag from '../rendering/shaders/ns/divergence.frag';
 import gradientFrag from '../rendering/shaders/ns/gradient.frag';
 import boundaryFragRaw from '../rendering/shaders/ns/boundary.frag';
 import { injectNoise } from '../rendering/shaders/injectNoise';
+import { FULLSCREEN_QUAD_VERT } from '../rendering/shaders/common/fullscreenQuad';
 
 const boundaryFrag = injectNoise(boundaryFragRaw);
 
-const VERT = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
+export interface IFlowField {
+  getTexture(): THREE.WebGLRenderTarget;
+  update(time: number, renderer: THREE.WebGLRenderer): void;
+  resize(width: number, height: number): void;
 }
-`;
 
 function createRT(w: number, h: number): THREE.WebGLRenderTarget {
   return new THREE.WebGLRenderTarget(w, h, {
@@ -29,7 +27,7 @@ function createRT(w: number, h: number): THREE.WebGLRenderTarget {
 
 function createPass(frag: string, uniforms: Record<string, THREE.IUniform>) {
   const material = new THREE.ShaderMaterial({
-    vertexShader: VERT,
+    vertexShader: FULLSCREEN_QUAD_VERT,
     fragmentShader: frag,
     uniforms,
   });
@@ -115,7 +113,7 @@ export class NavierStokesField implements IFlowField {
       uTexelSize: ts,
       uBaseSpeed: { value: ns.baseSpeed },
       uCurlStrength: { value: ns.curlStrength },
-      uCurlScale: { value: CONFIG.flow.curlScale },
+      uCurlScale: { value: CONFIG.navierStokes.curlScale },
       uTime: { value: 0 },
       uResolution: { value: new THREE.Vector2(width, height) },
       uForceBlend: { value: ns.forceBlend },

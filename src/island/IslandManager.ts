@@ -10,7 +10,7 @@ function randRange([min, max]: [number, number]): number {
   return lerp(min, max, Math.random());
 }
 
-export type InteractionMode = 'observer' | 'active';
+type InteractionMode = 'observer' | 'active';
 
 export class IslandManager {
   private islands: Island[] = [];
@@ -29,10 +29,6 @@ export class IslandManager {
 
   getIslands(): readonly Island[] {
     return this.islands;
-  }
-
-  getMode(): InteractionMode {
-    return this.mode;
   }
 
   switchToActive(): void {
