@@ -46,6 +46,11 @@ export class Renderer {
     this.audioManager = new AudioManager();
     this.clock = new THREE.Clock();
 
+    // Initialize dark mode from system preference
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    this.applyDarkMode(darkQuery.matches);
+    darkQuery.addEventListener('change', (e) => this.applyDarkMode(e.matches));
+
     const canvas = this.threeRenderer.domElement;
     this.inputHandler = new InputHandler(canvas, {
       onPress: (uv) => {
@@ -66,9 +71,20 @@ export class Renderer {
         this.islandManager.releaseHoldingIsland();
         this.islandManager.resetInactivityTimer();
       },
+      onTripleTap: () => {
+        this.applyDarkMode(!this.compositePass.isDarkMode());
+      },
     });
 
     window.addEventListener('resize', this.onResize);
+  }
+
+  private applyDarkMode(on: boolean): void {
+    this.compositePass.setDarkMode(on);
+    const color = on ? '#0f0d14' : '#f2ede6';
+    document.body.style.background = color;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', color);
   }
 
   private showRejectRipple(x: number, y: number): void {

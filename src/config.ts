@@ -53,6 +53,7 @@ export const CONFIG = {
   // Composite
   composite: {
     baseColor: [0.95, 0.93, 0.90],  // warm white river
+    darkBaseColor: [0.06, 0.05, 0.08],  // near-black for dark mode
     pigmentOpacity: 0.95,
   },
 } as const;

@@ -1,9 +1,11 @@
 const MIN_HOLD_MS = 60; // ignore taps shorter than this
+const TRIPLE_TAP_WINDOW_MS = 500;
 
 export interface InputCallbacks {
   onPress(uv: [number, number]): void;
   onHoldUpdate(uv: [number, number]): void;
   onRelease(uv: [number, number], duration: number): void;
+  onTripleTap?(): void;
 }
 
 export class InputHandler {
@@ -14,6 +16,7 @@ export class InputHandler {
   private holdPosition: [number, number] = [0, 0];
   private pressCommitted = false;
   private holdTimer: ReturnType<typeof setTimeout> | null = null;
+  private tapTimestamps: number[] = [];
 
   constructor(canvas: HTMLCanvasElement, callbacks: InputCallbacks) {
     this.canvas = canvas;
@@ -42,6 +45,21 @@ export class InputHandler {
     this.pressCommitted = false;
     this.holdStart = performance.now();
     this.holdPosition = this.screenToUV(e);
+
+    // Track taps for triple-tap detection
+    const now = performance.now();
+    this.tapTimestamps.push(now);
+    // Keep only the last 3
+    if (this.tapTimestamps.length > 3) {
+      this.tapTimestamps.shift();
+    }
+    if (this.tapTimestamps.length === 3) {
+      const elapsed = this.tapTimestamps[2] - this.tapTimestamps[0];
+      if (elapsed <= TRIPLE_TAP_WINDOW_MS) {
+        this.tapTimestamps = [];
+        this.callbacks.onTripleTap?.();
+      }
+    }
 
     // Defer onPress until minimum hold duration
     this.holdTimer = setTimeout(() => {

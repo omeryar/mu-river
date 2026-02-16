@@ -14,6 +14,7 @@ export class CompositePass {
   private material: THREE.ShaderMaterial;
   private scene: THREE.Scene;
   private camera: THREE.Camera;
+  private darkMode = false;
 
   constructor() {
     const [r, g, b] = CONFIG.composite.baseColor;
@@ -25,12 +26,24 @@ export class CompositePass {
         uIslandStamp: { value: null },
         uBaseColor: { value: new THREE.Vector3(r, g, b) },
         uPigmentOpacity: { value: CONFIG.composite.pigmentOpacity },
+        uDarkMode: { value: 0.0 },
       },
     });
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.Camera();
     this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+  }
+
+  setDarkMode(on: boolean): void {
+    this.darkMode = on;
+    const base = on ? CONFIG.composite.darkBaseColor : CONFIG.composite.baseColor;
+    this.material.uniforms.uBaseColor.value.set(base[0], base[1], base[2]);
+    this.material.uniforms.uDarkMode.value = on ? 1.0 : 0.0;
+  }
+
+  isDarkMode(): boolean {
+    return this.darkMode;
   }
 
   render(pigmentTex: THREE.WebGLRenderTarget, islandStampTex: THREE.WebGLRenderTarget, renderer: THREE.WebGLRenderer): void {
