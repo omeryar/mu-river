@@ -23,11 +23,6 @@ varying vec2 vUv;
 
 // noise functions injected at runtime via NOISE_PLACEHOLDER
 
-// Hash for per-pixel pseudo-random
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
 void main() {
   vec4 body = texture2D(uPrevBody, vUv);
   vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
@@ -52,7 +47,7 @@ void main() {
                         + snoise(rotated * 16.0 + float(i) * 5.9) * 0.05;
     float noisyDist = dist + boundaryNoise;
 
-    float shape = 1.0 - smoothstep(0.7, 0.92, noisyDist);
+    float shape = 1.0 - smoothstep(0.55, 0.95, noisyDist);
 
     // Subtle interior density variation (not flat/uniform)
     float interiorNoise = snoise(rotated * 12.0 + float(i) * 19.3) * 0.08;
@@ -105,20 +100,20 @@ void main() {
       float flowImpact = max(0.0, dot(flow, edgeNormal));
 
       // Spatial noise so erosion isn't uniform along the edge
-      // This creates the "some spots resist longer" effect
-      float resistance = snoise(vUv * 60.0 + uTime * 0.1) * 0.5 + 0.5;
-
-      // Temporal variation so different spots erode at different times
-      float temporal = hash(vUv * 1000.0 + fract(uTime * 7.3));
+      // Low frequency for large, gentle erosion patterns (like water-worn stone)
+      float resistance = snoise(vUv * 20.0 + uTime * 0.1) * 0.5 + 0.5;
 
       // Combine erosion factors
       float erodeAmount = exposure * uErodeRate
         * (0.3 + flowImpact * 0.7)  // flow bias
-        * (0.4 + temporal * 0.6)     // stochastic timing
-        * (1.2 - resistance * 0.8);  // spatial variation
+        * (1.2 - resistance * 0.8); // spatial variation
 
       body.a -= erodeAmount;
       body.a = max(0.0, body.a);
+
+      // Smooth erosion front: blend alpha toward neighbor average
+      // Rounds jagged edges over time, like water smoothing a stone
+      body.a = mix(body.a, avgNeighbor, 0.06);
     }
   }
 
