@@ -8,7 +8,7 @@ export const CONFIG = {
   flow: {
     baseSpeed: 0.25,        // upward base flow strength
     curlScale: 0.003,       // spatial frequency of curl noise
-    curlStrength: 0.12,     // curl perturbation for swirling plumes
+    curlStrength: 0.08,     // curl perturbation for swirling plumes
     octaves: 3,
     timeScale: 0.05,        // how fast the flow evolves
   },
@@ -45,9 +45,9 @@ export const CONFIG = {
   navierStokes: {
     pressureIterations: 20,
     baseSpeed: 0.25,             // upward base flow target
-    curlStrength: 0.12,          // stronger curl for swirling turbulence
+    curlStrength: 0.08,          // curl for swirling turbulence (kept below baseSpeed)
     timestep: 8,                 // advection step (~2 grid cells at base velocity)
-    forceBlend: 0.05,            // how quickly velocity relaxes toward target flow
+    forceBlend: 0.08,            // how quickly velocity relaxes toward target flow
   },
 
   // Composite
