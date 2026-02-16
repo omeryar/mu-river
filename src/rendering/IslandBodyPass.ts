@@ -3,18 +3,11 @@ import { CONFIG } from '../config';
 import { Island } from '../island/Island';
 import islandBodyFragRaw from './shaders/islandBody.frag';
 import { injectNoise } from './shaders/injectNoise';
+import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
 
 const islandBodyFrag = injectNoise(islandBodyFragRaw);
 
 const MAX_ISLANDS = 24;
-
-const VERT = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`;
 
 export class IslandBodyPass {
   private targets: [THREE.WebGLRenderTarget, THREE.WebGLRenderTarget];
@@ -36,7 +29,7 @@ export class IslandBodyPass {
     ];
 
     this.material = new THREE.ShaderMaterial({
-      vertexShader: VERT,
+      vertexShader: FULLSCREEN_QUAD_VERT,
       fragmentShader: islandBodyFrag,
       uniforms: {
         uPrevBody: { value: null },

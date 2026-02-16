@@ -1,14 +1,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../config';
 import compositeFrag from './shaders/composite.frag';
-
-const VERT = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`;
+import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
 
 export class CompositePass {
   private material: THREE.ShaderMaterial;
@@ -19,7 +12,7 @@ export class CompositePass {
   constructor() {
     const [r, g, b] = CONFIG.composite.baseColor;
     this.material = new THREE.ShaderMaterial({
-      vertexShader: VERT,
+      vertexShader: FULLSCREEN_QUAD_VERT,
       fragmentShader: compositeFrag,
       uniforms: {
         uPigment: { value: null },

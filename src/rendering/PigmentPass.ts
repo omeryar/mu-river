@@ -1,14 +1,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../config';
 import pigmentAdvectFrag from './shaders/pigmentAdvect.frag';
-
-const VERT = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 1.0);
-}
-`;
+import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
 
 export class PigmentPass {
   private targets: [THREE.WebGLRenderTarget, THREE.WebGLRenderTarget];
@@ -30,7 +23,7 @@ export class PigmentPass {
     ];
 
     this.material = new THREE.ShaderMaterial({
-      vertexShader: VERT,
+      vertexShader: FULLSCREEN_QUAD_VERT,
       fragmentShader: pigmentAdvectFrag,
       uniforms: {
         uPrevPigment: { value: null },
