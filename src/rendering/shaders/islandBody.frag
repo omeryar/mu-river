@@ -60,9 +60,11 @@ void main() {
 
     float density = shape * emerged * emergeOpacity;
 
-    // Max-blend: keep interior solid, only add new material
-    if (density > body.a) {
-      body = vec4(uIslandColor[i], density);
+    // Smooth blend: merge colors proportionally, max alpha for solid body
+    if (density > 0.001) {
+      float blend = density / (body.a + density + 0.001);
+      body.rgb = mix(body.rgb, uIslandColor[i], blend);
+      body.a = max(body.a, density);
     }
   }
 
