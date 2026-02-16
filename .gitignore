@@ -4,3 +4,4 @@ dist/
 .claude/
 assets/*
 !assets/MoonRiver_32x.mp3
+.a5c/
