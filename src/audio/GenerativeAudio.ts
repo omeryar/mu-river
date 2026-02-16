@@ -120,10 +120,10 @@ export class GenerativeAudio {
   }
 
   stop(): void {
-    for (const [id, voice] of this.voices) {
+    for (const voice of this.voices.values()) {
       voice.stop();
-      this.voices.delete(id);
     }
+    this.voices.clear();
     if (this.droneOsc) {
       this.droneOsc.stop();
       this.droneOsc.disconnect();
