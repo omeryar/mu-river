@@ -94,7 +94,12 @@ export class IslandManager {
       emergeDuration: randRange(CONFIG.island.emergeDuration),
       erodeDuration: randRange(CONFIG.island.erodeDuration),
       age: 0,
-    };
+      // Thought Profile properties
+      noiseFrequency: 2.0 + Math.random() * 8.0,
+      noiseAmplitude: 0.05 + Math.random() * 0.15,
+      pulseRate: 0.5 + Math.random() * 2.0,
+      permeability: Math.random(),
+    } as Island;
 
     this.islands.push(island);
     this.holdingIslandId = island.id;
@@ -173,8 +178,11 @@ export class IslandManager {
       0.2 + Math.random() * 0.5,
     ];
 
-    const color = PALETTE[this.paletteIndex % PALETTE.length];
-    this.paletteIndex++;
+    if (this.shuffledIndices.length === 0) {
+      this.reshufflePalette();
+    }
+    const colorIndex = this.shuffledIndices.pop()!;
+    const color = PALETTE[colorIndex];
 
     const island: Island = {
       id: this.nextId++,
@@ -189,7 +197,12 @@ export class IslandManager {
       emergeDuration: randRange(CONFIG.island.emergeDuration),
       erodeDuration: randRange(CONFIG.island.erodeDuration),
       age: 0,
-    };
+      // Thought Profile properties
+      noiseFrequency: 2.0 + Math.random() * 8.0,
+      noiseAmplitude: 0.05 + Math.random() * 0.15,
+      pulseRate: 0.5 + Math.random() * 2.0,
+      permeability: Math.random(),
+    } as Island;
 
     this.islands.push(island);
   }

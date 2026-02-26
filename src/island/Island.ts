@@ -1,3 +1,8 @@
+
+
+<current_content>
+
+<current_content>
 export type IslandPhase = 'emerging' | 'eroding' | 'done';
 
 export interface Island {
@@ -14,3 +19,6 @@ export interface Island {
   erodeDuration: number;       // seconds
   age: number;                 // seconds since spawn
 }
+
+</current_content>
+</current_content>
