@@ -1,104 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Mu River</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#000000" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { min-height: calc(100% + env(safe-area-inset-top)); }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    canvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-    .reject-ripple {
-      position: fixed;
-      pointer-events: none;
-      width: 60px; height: 60px;
-      margin-left: -30px; margin-top: -30px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      animation: ripple-out 0.5s ease-out forwards;
-    }
-    @keyframes ripple-out {
-      0%   { transform: scale(0.3); opacity: 0.8; }
-      100% { transform: scale(1.2); opacity: 0; }
-    }
-    #mute-btn {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      z-index: 10;
-      background: rgba(0, 0, 0, 0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: rgba(255, 255, 255, 0.85);
-      opacity: 0;
-      transition: opacity 0.6s ease, background 0.2s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #mute-btn.visible { opacity: 1; }
-    #mute-btn:hover { background: rgba(0, 0, 0, 0.4); }
-    #volume-wrap {
-      position: fixed;
-      bottom: 62px;
-      right: 16px;
-      width: 40px;
-      height: 100px;
-      z-index: 10;
-      background: rgba(0, 0, 0, 0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-    #volume-wrap.visible { opacity: 1; pointer-events: auto; }
-    #volume-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 80px;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 2px;
-      outline: none;
-      transform: rotate(-90deg);
-      transform-origin: center center;
-    }
-    #volume-slider::-webkit-slider-runnable-track {
-      background: rgba(255, 255, 255, 0.3);
-      height: 3px;
-      border-radius: 2px;
-    }
-    #volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.85);
-      cursor: pointer;
-      margin-top: -6.5px;
-    }
-  </style>
-</head>
-<body>
-  <script type="module" src="./index.ts"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Mu River</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="theme-color" content="#000000" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        min-height: calc(100% + env(safe-area-inset-top));
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .reject-ripple {
+        position: fixed;
+        pointer-events: none;
+        width: 60px;
+        height: 60px;
+        margin-left: -30px;
+        margin-top: -30px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        animation: ripple-out 0.5s ease-out forwards;
+      }
+      @keyframes ripple-out {
+        0% {
+          transform: scale(0.3);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.2);
+          opacity: 0;
+        }
+      }
+      #mute-btn {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.85);
+        opacity: 0;
+        transition:
+          opacity 0.6s ease,
+          background 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #mute-btn.visible {
+        opacity: 1;
+      }
+      #mute-btn:hover {
+        background: rgba(0, 0, 0, 0.4);
+      }
+      #volume-wrap {
+        position: fixed;
+        bottom: 62px;
+        right: 16px;
+        width: 40px;
+        height: 100px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      #volume-wrap.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #volume-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 80px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        outline: none;
+        transform: rotate(-90deg);
+        transform-origin: center center;
+      }
+      #volume-slider::-webkit-slider-runnable-track {
+        background: rgba(255, 255, 255, 0.3);
+        height: 3px;
+        border-radius: 2px;
+      }
+      #volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.85);
+        cursor: pointer;
+        margin-top: -6.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="./index.ts"></script>
+  </body>
 </html>

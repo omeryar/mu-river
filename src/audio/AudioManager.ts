@@ -1,5 +1,5 @@
-import { Island } from '../island/Island';
-import { GenerativeAudio } from './GenerativeAudio';
+import { Island } from "../island/Island";
+import { GenerativeAudio } from "./GenerativeAudio";
 
 const ICON_UNMUTED = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
 
@@ -27,17 +27,17 @@ export class AudioManager {
         this.generativeAudio = new GenerativeAudio(this.ctx);
         this.generativeAudio.setVolume(this.volume);
       }
-      if (this.ctx.state === 'suspended') {
+      if (this.ctx.state === "suspended") {
         this.ctx.resume();
       }
       // Start drone within user gesture so iOS allows playback
       this.generativeAudio!.startDrone();
       this.playing = true;
-      this.sliderWrap.classList.add('visible');
+      this.sliderWrap.classList.add("visible");
     } else {
       this.generativeAudio!.stop();
       this.playing = false;
-      this.sliderWrap.classList.remove('visible');
+      this.sliderWrap.classList.remove("visible");
     }
     this.updateButtonLabel();
   }
@@ -51,9 +51,9 @@ export class AudioManager {
   }
 
   private createMuteButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.id = 'mute-btn';
-    btn.addEventListener('click', (e) => {
+    const btn = document.createElement("button");
+    btn.id = "mute-btn";
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.toggle();
     });
@@ -61,34 +61,45 @@ export class AudioManager {
     this.updateButtonLabelOn(btn, false);
 
     // Show immediately
-    requestAnimationFrame(() => btn.classList.add('visible'));
+    requestAnimationFrame(() => btn.classList.add("visible"));
     return btn;
   }
 
   private createSlider(): HTMLDivElement {
-    const wrap = document.createElement('div');
-    wrap.id = 'volume-wrap';
+    const wrap = document.createElement("div");
+    wrap.id = "volume-wrap";
 
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = '0';
-    slider.max = '1';
-    slider.step = '0.01';
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "0";
+    slider.max = "1";
+    slider.step = "0.01";
     slider.value = String(this.volume);
-    slider.id = 'volume-slider';
+    slider.id = "volume-slider";
 
     const updateVolume = () => {
       this.volume = parseFloat(slider.value);
       if (this.generativeAudio) this.generativeAudio.setVolume(this.volume);
     };
-    slider.addEventListener('input', (e) => { e.stopPropagation(); updateVolume(); });
-    slider.addEventListener('change', (e) => { e.stopPropagation(); updateVolume(); });
+    slider.addEventListener("input", (e) => {
+      e.stopPropagation();
+      updateVolume();
+    });
+    slider.addEventListener("change", (e) => {
+      e.stopPropagation();
+      updateVolume();
+    });
     // Prevent touch events from propagating to canvas
-    for (const evt of ['pointerdown', 'touchstart', 'touchmove', 'touchend'] as const) {
+    for (const evt of [
+      "pointerdown",
+      "touchstart",
+      "touchmove",
+      "touchend",
+    ] as const) {
       slider.addEventListener(evt, (e) => e.stopPropagation());
     }
-    wrap.addEventListener('pointerdown', (e) => e.stopPropagation());
-    wrap.addEventListener('touchstart', (e) => e.stopPropagation());
+    wrap.addEventListener("pointerdown", (e) => e.stopPropagation());
+    wrap.addEventListener("touchstart", (e) => e.stopPropagation());
 
     wrap.appendChild(slider);
     document.body.appendChild(wrap);

@@ -1,6 +1,6 @@
-import { Island } from '../island/Island';
-import { IslandVoice } from './IslandVoice';
-import { getNextMoonRiverStep } from './scales';
+import { Island } from "../island/Island";
+import { IslandVoice } from "./IslandVoice";
+import { getNextMoonRiverStep } from "./scales";
 
 export class GenerativeAudio {
   private ctx: AudioContext;
@@ -60,7 +60,7 @@ export class GenerativeAudio {
   startDrone(): void {
     if (this.droneOsc) return;
     this.droneOsc = this.ctx.createOscillator();
-    this.droneOsc.type = 'sine';
+    this.droneOsc.type = "sine";
     this.droneOsc.frequency.setValueAtTime(65.41, this.ctx.currentTime); // C2
     this.droneOsc.connect(this.droneGain);
     this.droneOsc.start();
@@ -75,14 +75,20 @@ export class GenerativeAudio {
     const activeIds = new Set<number>();
 
     for (const island of islands) {
-      if (island.phase === 'done') continue;
+      if (island.phase === "done") continue;
       activeIds.add(island.id);
 
       let voice = this.voices.get(island.id);
       if (!voice) {
         // Each voice gets separate dry and wet (convolver) destinations
         const step = getNextMoonRiverStep();
-        voice = new IslandVoice(island.id, step, this.ctx, this.dryGain, this.convolver);
+        voice = new IslandVoice(
+          island.id,
+          step,
+          this.ctx,
+          this.dryGain,
+          this.convolver,
+        );
         this.voices.set(island.id, voice);
       }
       voice.update(island);

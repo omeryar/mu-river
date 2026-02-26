@@ -1,5 +1,5 @@
-import { Island } from '../island/Island';
-import { MoonRiverStep } from './scales';
+import { Island } from "../island/Island";
+import { MoonRiverStep } from "./scales";
 
 // Post-fade duration: how long the voice lingers after the island is gone,
 // matching the pigment plume dissipation (~decay 0.999/frame at 60fps).
@@ -40,7 +40,7 @@ export class IslandVoice {
 
     // Primary melody oscillator — sine for dreamy quality
     this.melodyOsc = ctx.createOscillator();
-    this.melodyOsc.type = 'sine';
+    this.melodyOsc.type = "sine";
     this.melodyOsc.frequency.setValueAtTime(step.melody, ctx.currentTime);
     this.melodyOsc.connect(this.gainNode);
 
@@ -51,7 +51,7 @@ export class IslandVoice {
 
     for (const freq of step.chord) {
       const osc = ctx.createOscillator();
-      osc.type = 'sine';
+      osc.type = "sine";
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
       osc.connect(chordGain);
       this.chordOscs.push(osc);
@@ -81,11 +81,11 @@ export class IslandVoice {
     let envelope = 1.0;
     let wetMix = 0.2;
 
-    if (island.phase === 'emerging') {
+    if (island.phase === "emerging") {
       // Smooth attack curve
       envelope = island.emergeProgress * island.emergeProgress;
       wetMix = 0.2;
-    } else if (island.phase === 'eroding') {
+    } else if (island.phase === "eroding") {
       // During erosion: gain fades gently, reverb increases
       const remaining = 1 - island.erodeProgress;
       // Slower fade — the plume is still very visible during erosion

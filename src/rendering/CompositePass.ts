@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { CONFIG } from '../config';
-import compositeFrag from './shaders/composite.frag';
-import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
+import * as THREE from "three";
+import { CONFIG } from "../config";
+import compositeFrag from "./shaders/composite.frag";
+import { FULLSCREEN_QUAD_VERT } from "./shaders/common/fullscreenQuad";
 
 export class CompositePass {
   private material: THREE.ShaderMaterial;
@@ -25,12 +25,16 @@ export class CompositePass {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.Camera();
-    this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+    this.scene.add(
+      new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material),
+    );
   }
 
   setDarkMode(on: boolean): void {
     this.darkMode = on;
-    const base = on ? CONFIG.composite.darkBaseColor : CONFIG.composite.baseColor;
+    const base = on
+      ? CONFIG.composite.darkBaseColor
+      : CONFIG.composite.baseColor;
     this.material.uniforms.uBaseColor.value.set(base[0], base[1], base[2]);
     this.material.uniforms.uDarkMode.value = on ? 1.0 : 0.0;
   }
@@ -39,7 +43,11 @@ export class CompositePass {
     return this.darkMode;
   }
 
-  render(pigmentTex: THREE.WebGLRenderTarget, islandStampTex: THREE.WebGLRenderTarget, renderer: THREE.WebGLRenderer): void {
+  render(
+    pigmentTex: THREE.WebGLRenderTarget,
+    islandStampTex: THREE.WebGLRenderTarget,
+    renderer: THREE.WebGLRenderer,
+  ): void {
     this.material.uniforms.uPigment.value = pigmentTex.texture;
     this.material.uniforms.uIslandStamp.value = islandStampTex.texture;
     renderer.setRenderTarget(null); // render to screen

@@ -1,7 +1,7 @@
-import { Renderer } from './core/Renderer';
+import { Renderer } from "./core/Renderer";
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(new URL('./sw.js', import.meta.url));
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register(new URL("./sw.js", import.meta.url));
 }
 
 const renderer = new Renderer();

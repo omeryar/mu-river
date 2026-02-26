@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { CONFIG } from '../config';
-import pigmentAdvectFrag from './shaders/pigmentAdvect.frag';
-import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
+import * as THREE from "three";
+import { CONFIG } from "../config";
+import pigmentAdvectFrag from "./shaders/pigmentAdvect.frag";
+import { FULLSCREEN_QUAD_VERT } from "./shaders/common/fullscreenQuad";
 
 export class PigmentPass {
   private targets: [THREE.WebGLRenderTarget, THREE.WebGLRenderTarget];
@@ -39,7 +39,9 @@ export class PigmentPass {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.Camera();
-    this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+    this.scene.add(
+      new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material),
+    );
   }
 
   getTexture(): THREE.WebGLRenderTarget {

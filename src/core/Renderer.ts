@@ -1,12 +1,12 @@
-import * as THREE from 'three';
-import { CONFIG } from '../config';
-import { NavierStokesField } from '../simulation/NavierStokesField';
-import { IslandManager } from '../island/IslandManager';
-import { IslandBodyPass } from '../rendering/IslandBodyPass';
-import { PigmentPass } from '../rendering/PigmentPass';
-import { CompositePass } from '../rendering/CompositePass';
-import { InputHandler } from '../input/InputHandler';
-import { AudioManager } from '../audio/AudioManager';
+import * as THREE from "three";
+import { CONFIG } from "../config";
+import { NavierStokesField } from "../simulation/NavierStokesField";
+import { IslandManager } from "../island/IslandManager";
+import { IslandBodyPass } from "../rendering/IslandBodyPass";
+import { PigmentPass } from "../rendering/PigmentPass";
+import { CompositePass } from "../rendering/CompositePass";
+import { InputHandler } from "../input/InputHandler";
+import { AudioManager } from "../audio/AudioManager";
 
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -47,9 +47,9 @@ export class Renderer {
     this.clock = new THREE.Clock();
 
     // Initialize dark mode from system preference
-    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
     this.applyDarkMode(darkQuery.matches);
-    darkQuery.addEventListener('change', (e) => this.applyDarkMode(e.matches));
+    darkQuery.addEventListener("change", (e) => this.applyDarkMode(e.matches));
 
     const canvas = this.threeRenderer.domElement;
     this.inputHandler = new InputHandler(canvas, {
@@ -76,24 +76,24 @@ export class Renderer {
       },
     });
 
-    window.addEventListener('resize', this.onResize);
+    window.addEventListener("resize", this.onResize);
   }
 
   private applyDarkMode(on: boolean): void {
     this.compositePass.setDarkMode(on);
-    const color = on ? '#0f0d14' : '#f2ede6';
+    const color = on ? "#0f0d14" : "#f2ede6";
     document.body.style.background = color;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', color);
+    if (meta) meta.setAttribute("content", color);
   }
 
   private showRejectRipple(x: number, y: number): void {
-    const el = document.createElement('div');
-    el.className = 'reject-ripple';
+    const el = document.createElement("div");
+    el.className = "reject-ripple";
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
     document.body.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
+    el.addEventListener("animationend", () => el.remove());
   }
 
   private onResize = (): void => {

@@ -1,9 +1,9 @@
-import * as THREE from 'three';
-import { CONFIG } from '../config';
-import { Island } from '../island/Island';
-import islandBodyFragRaw from './shaders/islandBody.frag';
-import { injectNoise } from './shaders/injectNoise';
-import { FULLSCREEN_QUAD_VERT } from './shaders/common/fullscreenQuad';
+import * as THREE from "three";
+import { CONFIG } from "../config";
+import { Island } from "../island/Island";
+import islandBodyFragRaw from "./shaders/islandBody.frag";
+import { injectNoise } from "./shaders/injectNoise";
+import { FULLSCREEN_QUAD_VERT } from "./shaders/common/fullscreenQuad";
 
 const islandBodyFrag = injectNoise(islandBodyFragRaw);
 
@@ -39,11 +39,19 @@ export class IslandBodyPass {
         uErodeRate: { value: CONFIG.island.erodeRate },
         uGlobalDecay: { value: CONFIG.island.globalDecay },
         uIslandCount: { value: 0 },
-        uIslandPos: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector2()) },
+        uIslandPos: {
+          value: new Array(MAX_ISLANDS)
+            .fill(null)
+            .map(() => new THREE.Vector2()),
+        },
         uIslandRadius: { value: new Float32Array(MAX_ISLANDS) },
         uIslandElongation: { value: new Float32Array(MAX_ISLANDS) },
         uIslandRotation: { value: new Float32Array(MAX_ISLANDS) },
-        uIslandColor: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector3()) },
+        uIslandColor: {
+          value: new Array(MAX_ISLANDS)
+            .fill(null)
+            .map(() => new THREE.Vector3()),
+        },
         uIslandEmerge: { value: new Float32Array(MAX_ISLANDS) },
         uIslandEroding: { value: new Float32Array(MAX_ISLANDS) },
         uIslandNoiseFreq: { value: new Float32Array(MAX_ISLANDS) },
@@ -56,7 +64,9 @@ export class IslandBodyPass {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.Camera();
-    this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
+    this.scene.add(
+      new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material),
+    );
   }
 
   getTexture(): THREE.WebGLRenderTarget {
@@ -81,13 +91,21 @@ export class IslandBodyPass {
     for (let i = 0; i < MAX_ISLANDS; i++) {
       if (i < islands.length) {
         const isl = islands[i];
-        (u.uIslandPos.value as THREE.Vector2[])[i].set(isl.position[0], isl.position[1]);
+        (u.uIslandPos.value as THREE.Vector2[])[i].set(
+          isl.position[0],
+          isl.position[1],
+        );
         (u.uIslandRadius.value as Float32Array)[i] = isl.radius;
         (u.uIslandElongation.value as Float32Array)[i] = isl.elongation;
         (u.uIslandRotation.value as Float32Array)[i] = isl.rotation;
-        (u.uIslandColor.value as THREE.Vector3[])[i].set(isl.color[0], isl.color[1], isl.color[2]);
+        (u.uIslandColor.value as THREE.Vector3[])[i].set(
+          isl.color[0],
+          isl.color[1],
+          isl.color[2],
+        );
         (u.uIslandEmerge.value as Float32Array)[i] = isl.emergeProgress;
-        (u.uIslandEroding.value as Float32Array)[i] = isl.phase === 'eroding' ? 1.0 : 0.0;
+        (u.uIslandEroding.value as Float32Array)[i] =
+          isl.phase === "eroding" ? 1.0 : 0.0;
         (u.uIslandNoiseFreq.value as Float32Array)[i] = isl.noiseFrequency;
         (u.uIslandNoiseAmp.value as Float32Array)[i] = isl.noiseAmplitude;
         (u.uIslandPulseRate.value as Float32Array)[i] = isl.pulseRate;

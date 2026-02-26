@@ -1,6 +1,6 @@
-import { Island, IslandPhase } from './Island';
-import { CONFIG } from '../config';
-import { PALETTE } from '../palette/colors';
+import { Island, IslandPhase } from "./Island";
+import { CONFIG } from "../config";
+import { PALETTE } from "../palette/colors";
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -10,7 +10,7 @@ function randRange([min, max]: [number, number]): number {
   return lerp(min, max, Math.random());
 }
 
-type InteractionMode = 'observer' | 'active';
+type InteractionMode = "observer" | "active";
 
 export class IslandManager {
   private islands: Island[] = [];

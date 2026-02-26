@@ -1,24 +1,20 @@
-
-
-<current_content>
-
-<current_content>
-export type IslandPhase = 'emerging' | 'eroding' | 'done';
+export type IslandPhase = "emerging" | "eroding" | "done";
 
 export interface Island {
   id: number;
-  position: [number, number];  // normalized [0,1]
-  radius: number;              // normalized to screen height
-  elongation: number;          // 1.0 = circle, 1.5 = oval
-  rotation: number;            // radians
+  position: [number, number];
+  radius: number;
+  elongation: number;
+  rotation: number;
   color: [number, number, number];
   phase: IslandPhase;
-  emergeProgress: number;      // 0 → 1
-  erodeProgress: number;       // 0 → 1
-  emergeDuration: number;      // seconds
-  erodeDuration: number;       // seconds
-  age: number;                 // seconds since spawn
+  emergeProgress: number;
+  erodeProgress: number;
+  emergeDuration: number;
+  erodeDuration: number;
+  age: number;
+  noiseFrequency: number;
+  noiseAmplitude: number;
+  pulseRate: number;
+  permeability: number;
 }
-
-</current_content>
-</current_content>

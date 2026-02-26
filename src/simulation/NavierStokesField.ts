@@ -1,12 +1,12 @@
-import * as THREE from 'three';
-import { CONFIG } from '../config';
-import advectFrag from '../rendering/shaders/ns/advect.frag';
-import jacobiFrag from '../rendering/shaders/ns/jacobi.frag';
-import divergenceFrag from '../rendering/shaders/ns/divergence.frag';
-import gradientFrag from '../rendering/shaders/ns/gradient.frag';
-import boundaryFragRaw from '../rendering/shaders/ns/boundary.frag';
-import { injectNoise } from '../rendering/shaders/injectNoise';
-import { FULLSCREEN_QUAD_VERT } from '../rendering/shaders/common/fullscreenQuad';
+import * as THREE from "three";
+import { CONFIG } from "../config";
+import advectFrag from "../rendering/shaders/ns/advect.frag";
+import jacobiFrag from "../rendering/shaders/ns/jacobi.frag";
+import divergenceFrag from "../rendering/shaders/ns/divergence.frag";
+import gradientFrag from "../rendering/shaders/ns/gradient.frag";
+import boundaryFragRaw from "../rendering/shaders/ns/boundary.frag";
+import { injectNoise } from "../rendering/shaders/injectNoise";
+import { FULLSCREEN_QUAD_VERT } from "../rendering/shaders/common/fullscreenQuad";
 
 const boundaryFrag = injectNoise(boundaryFragRaw);
 
