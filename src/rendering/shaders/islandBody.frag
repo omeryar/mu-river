@@ -62,7 +62,8 @@ void main() {
     // Animate the noise over time so the thought "breathes" and shifts
     vec2 noisePos = rotated * freq + vec2(uTime * uIslandPulseRate[i] * 0.5 + float(i) * 13.7);
     // Scale the amplitude inversely by the radius so small thoughts wiggle just as much
-    float absoluteAmp = amp / max(0.01, uIslandRadius[i]);
+    // Scale amplitude so world-space wiggle is constant, using 0.08 as the baseline radius
+    float absoluteAmp = amp * (0.08 / max(0.02, uIslandRadius[i]));
     float boundaryNoise = snoise(noisePos) * absoluteAmp 
                         + snoise(noisePos * 2.0) * (absoluteAmp * 0.5);
                         
