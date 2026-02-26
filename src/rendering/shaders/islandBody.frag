@@ -17,6 +17,13 @@ uniform float uIslandRotation[MAX_ISLANDS];
 uniform vec3 uIslandColor[MAX_ISLANDS];
 uniform float uIslandEmerge[MAX_ISLANDS]; // 0–1 emergence, >= 1 means fully emerged
 uniform float uIslandEroding[MAX_ISLANDS]; // 1.0 if in erosion phase, 0.0 otherwise
+
+// Thought Profile uniforms
+uniform float uIslandNoiseFreq[MAX_ISLANDS];
+uniform float uIslandNoiseAmp[MAX_ISLANDS];
+uniform float uIslandPulseRate[MAX_ISLANDS];
+uniform float uIslandPermeability[MAX_ISLANDS];
+
 uniform vec2 uResolution;
 
 varying vec2 vUv;
@@ -40,18 +47,32 @@ void main() {
     vec2 rotated = vec2(delta.x * cs + delta.y * sn,
                        -delta.x * sn + delta.y * cs);
     rotated.x *= uIslandElongation[i];
+    
+    // Calculate base distance
     float dist = length(rotated) / uIslandRadius[i];
 
-    // Noise-perturbed distance for irregular boundary (like a weathered stone)
-    float boundaryNoise = snoise(rotated * 8.0 + float(i) * 13.7) * 0.1
-                        + snoise(rotated * 16.0 + float(i) * 5.9) * 0.05;
+    // Pulsation effect based on pulseRate
+    float pulse = sin(uTime * uIslandPulseRate[i] + float(i) * 1.5) * 0.05;
+    dist -= pulse;
+
+    // Noise-perturbed distance for organic boundary
+    float freq = uIslandNoiseFreq[i];
+    float amp = uIslandNoiseAmp[i];
+    
+    // Animate the noise over time so the thought "breathes" and shifts
+    vec2 noisePos = rotated * freq + vec2(uTime * uIslandPulseRate[i] * 0.5 + float(i) * 13.7);
+    float boundaryNoise = snoise(noisePos) * amp 
+                        + snoise(noisePos * 2.0) * (amp * 0.5);
+                        
     float noisyDist = dist + boundaryNoise;
 
-    float shape = 1.0 - smoothstep(0.55, 0.95, noisyDist);
+    // Soften the edge based on permeability
+    float edgeSoftness = mix(0.1, 0.4, uIslandPermeability[i]);
+    float shape = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0 + edgeSoftness, noisyDist);
 
-    // Subtle interior density variation (not flat/uniform)
-    float interiorNoise = snoise(rotated * 12.0 + float(i) * 19.3) * 0.08;
-    shape *= (0.95 + interiorNoise);
+    // Subtle interior density variation
+    float interiorNoise = snoise(rotated * freq * 1.5 + vec2(uTime * 0.2 + float(i) * 19.3)) * 0.1;
+    shape *= (0.9 + interiorNoise);
 
     // Emergence: center appears first, grows outward
     float emergeThresh = 1.0 - uIslandEmerge[i];
@@ -64,7 +85,11 @@ void main() {
     if (density > 0.001) {
       float blend = density / (body.a + density + 0.001);
       body.rgb = mix(body.rgb, uIslandColor[i], blend);
-      body.a = max(body.a, density);
+      
+      // Apply permeability to the alpha channel (which acts as the obstacle)
+      // High permeability = lower alpha = less obstacle
+      float targetAlpha = density * (1.0 - uIslandPermeability[i] * 0.8);
+      body.a = max(body.a, targetAlpha);
     }
   }
 
@@ -102,8 +127,7 @@ void main() {
       float flowImpact = max(0.0, dot(flow, edgeNormal));
 
       // Spatial noise so erosion isn't uniform along the edge
-      // Low frequency for large, gentle erosion patterns (like water-worn stone)
-      float resistance = snoise(vUv * 20.0 + uTime * 0.1) * 0.5 + 0.5;
+      float resistance = snoise(vUv * 20.0 + vec2(uTime * 0.1)) * 0.5 + 0.5;
 
       // Combine erosion factors
       float erodeAmount = exposure * uErodeRate
@@ -114,7 +138,6 @@ void main() {
       body.a = max(0.0, body.a);
 
       // Smooth erosion front: blend alpha toward neighbor average
-      // Rounds jagged edges over time, like water smoothing a stone
       body.a = mix(body.a, avgNeighbor, 0.06);
     }
   }

@@ -46,6 +46,10 @@ export class IslandBodyPass {
         uIslandColor: { value: new Array(MAX_ISLANDS).fill(null).map(() => new THREE.Vector3()) },
         uIslandEmerge: { value: new Float32Array(MAX_ISLANDS) },
         uIslandEroding: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandNoiseFreq: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandNoiseAmp: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandPulseRate: { value: new Float32Array(MAX_ISLANDS) },
+        uIslandPermeability: { value: new Float32Array(MAX_ISLANDS) },
         uResolution: { value: new THREE.Vector2(width, height) },
       },
     });
@@ -84,6 +88,10 @@ export class IslandBodyPass {
         (u.uIslandColor.value as THREE.Vector3[])[i].set(isl.color[0], isl.color[1], isl.color[2]);
         (u.uIslandEmerge.value as Float32Array)[i] = isl.emergeProgress;
         (u.uIslandEroding.value as Float32Array)[i] = isl.phase === 'eroding' ? 1.0 : 0.0;
+        (u.uIslandNoiseFreq.value as Float32Array)[i] = isl.noiseFrequency;
+        (u.uIslandNoiseAmp.value as Float32Array)[i] = isl.noiseAmplitude;
+        (u.uIslandPulseRate.value as Float32Array)[i] = isl.pulseRate;
+        (u.uIslandPermeability.value as Float32Array)[i] = isl.permeability;
       }
     }
 
