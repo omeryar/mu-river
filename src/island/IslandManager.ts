@@ -17,14 +17,26 @@ export class IslandManager {
   private nextId = 0;
   private spawnTimer = 0;
   private nextSpawnDelay: number;
-  private paletteIndex = 0;
+  private shuffledIndices: number[] = [];
 
-  private mode: InteractionMode = 'observer';
+  private mode: InteractionMode = "observer";
   private inactivityTimer = 0;
   private holdingIslandId: number | null = null;
 
   constructor() {
     this.nextSpawnDelay = randRange(CONFIG.island.spawnInterval);
+    this.reshufflePalette();
+  }
+
+  private reshufflePalette(): void {
+    this.shuffledIndices = Array.from({ length: PALETTE.length }, (_, i) => i);
+    for (let i = this.shuffledIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.shuffledIndices[i], this.shuffledIndices[j]] = [
+        this.shuffledIndices[j],
+        this.shuffledIndices[i],
+      ];
+    }
   }
 
   getIslands(): readonly Island[] {
@@ -32,13 +44,13 @@ export class IslandManager {
   }
 
   switchToActive(): void {
-    if (this.mode === 'active') return;
-    this.mode = 'active';
+    if (this.mode === "active") return;
+    this.mode = "active";
     this.inactivityTimer = 0;
   }
 
   private switchToObserver(): void {
-    this.mode = 'observer';
+    this.mode = "observer";
     this.holdingIslandId = null;
     this.spawnTimer = 0;
     this.nextSpawnDelay = randRange(CONFIG.island.spawnInterval);
@@ -50,18 +62,24 @@ export class IslandManager {
 
   /** Spawn an island at the given UV position. Returns the island, or null if rejected. */
   spawnAtPosition(uv: [number, number]): Island | null {
-    const maxCount = this.mode === 'active'
-      ? CONFIG.activeMode.maxConcurrent
-      : CONFIG.island.maxConcurrent;
+    const maxCount =
+      this.mode === "active"
+        ? CONFIG.activeMode.maxConcurrent
+        : CONFIG.island.maxConcurrent;
 
     // Don't count islands that are mostly eroded (>80%) against the cap
-    const activeCount = this.islands.filter(i => i.erodeProgress < 0.8).length;
+    const activeCount = this.islands.filter(
+      (i) => i.erodeProgress < 0.8,
+    ).length;
     if (activeCount >= maxCount) return null;
 
     const newRadius = CONFIG.activeMode.minRadius;
 
-    const color = PALETTE[this.paletteIndex % PALETTE.length];
-    this.paletteIndex++;
+    if (this.shuffledIndices.length === 0) {
+      this.reshufflePalette();
+    }
+    const colorIndex = this.shuffledIndices.pop()!;
+    const color = PALETTE[colorIndex];
 
     const island: Island = {
       id: this.nextId++,
@@ -70,7 +88,7 @@ export class IslandManager {
       elongation: 1.2 + Math.random() * 0.6,
       rotation: Math.random() * Math.PI,
       color,
-      phase: 'emerging',
+      phase: "emerging",
       emergeProgress: 0,
       erodeProgress: 0,
       emergeDuration: randRange(CONFIG.island.emergeDuration),
@@ -86,7 +104,7 @@ export class IslandManager {
   /** Grow the currently-held island's radius up to max. */
   updateHoldingIsland(dt: number): void {
     if (this.holdingIslandId === null) return;
-    const island = this.islands.find(i => i.id === this.holdingIslandId);
+    const island = this.islands.find((i) => i.id === this.holdingIslandId);
     if (!island) {
       this.holdingIslandId = null;
       return;
@@ -107,30 +125,33 @@ export class IslandManager {
     for (const island of this.islands) {
       island.age += dt;
 
-      if (island.phase === 'emerging') {
+      if (island.phase === "emerging") {
         island.emergeProgress = Math.min(1, island.age / island.emergeDuration);
         // Don't transition to eroding while being held
         if (island.emergeProgress >= 1 && island.id !== this.holdingIslandId) {
-          island.phase = 'eroding';
+          island.phase = "eroding";
         }
       }
 
-      if (island.phase === 'eroding') {
+      if (island.phase === "eroding") {
         const erodeAge = island.age - island.emergeDuration;
         island.erodeProgress = Math.min(1, erodeAge / island.erodeDuration);
         if (island.erodeProgress >= 1) {
-          island.phase = 'done';
+          island.phase = "done";
         }
       }
     }
 
     // Remove finished islands
-    this.islands = this.islands.filter(i => i.phase !== 'done');
+    this.islands = this.islands.filter((i) => i.phase !== "done");
 
-    if (this.mode === 'observer') {
+    if (this.mode === "observer") {
       // Auto-spawn in observer mode
       this.spawnTimer += dt;
-      if (this.spawnTimer >= this.nextSpawnDelay && this.islands.length < CONFIG.island.maxConcurrent) {
+      if (
+        this.spawnTimer >= this.nextSpawnDelay &&
+        this.islands.length < CONFIG.island.maxConcurrent
+      ) {
         this.autoSpawn();
         this.spawnTimer = 0;
         this.nextSpawnDelay = randRange(CONFIG.island.spawnInterval);
@@ -147,7 +168,10 @@ export class IslandManager {
   private autoSpawn(): void {
     const radius = randRange(CONFIG.island.radiusRange);
 
-    const position: [number, number] = [0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.5];
+    const position: [number, number] = [
+      0.2 + Math.random() * 0.6,
+      0.2 + Math.random() * 0.5,
+    ];
 
     const color = PALETTE[this.paletteIndex % PALETTE.length];
     this.paletteIndex++;
@@ -159,7 +183,7 @@ export class IslandManager {
       elongation: 1.2 + Math.random() * 0.6,
       rotation: Math.random() * Math.PI,
       color,
-      phase: 'emerging',
+      phase: "emerging",
       emergeProgress: 0,
       erodeProgress: 0,
       emergeDuration: randRange(CONFIG.island.emergeDuration),
